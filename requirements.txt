@@ -1,0 +1,36 @@
+# Frontend Dependencies
+# Core
+react>=18.2.0
+react-dom>=18.2.0
+react-router-dom>=6.21.3
+
+# UI & Styling
+@mui/material>=5.15.6
+@mui/icons-material>=5.15.6
+@emotion/react>=11.11.3
+@emotion/styled>=11.11.0
+tailwindcss>=3.4.1
+
+# Features
+firebase>=12.12.1
+axios>=1.6.5
+react-hook-form>=7.49.3
+html5-qrcode>=2.3.8
+qrcode>=1.5.3
+
+# Backend Dependencies (server/)
+# Core
+express>=4.18.2
+mongoose>=8.1.1
+dotenv>=16.4.1
+
+# Security & Middleware
+cors>=2.8.5
+helmet>=7.1.0
+express-rate-limit>=7.1.5
+morgan>=1.10.0
+
+# Auth & Integrations
+firebase-admin>=12.0.0
+jsonwebtoken>=9.0.2
+bcryptjs>=2.4.3
