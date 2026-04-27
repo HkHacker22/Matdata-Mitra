@@ -34,3 +34,7 @@ pnpm-debug.log*
 dist-*/
 .service-workers/
 node_modules
+
+# Firebase Admin Service Account Key (NEVER commit this)
+server/config/serviceAccountKey.json
+server/node_modules/
