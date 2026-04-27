@@ -43,19 +43,20 @@ const socials = ['Facebook', 'Twitter/X', 'YouTube', 'Instagram', 'Telegram', 'K
 
 export default function MegaFooter() {
   return (
-    <footer style={{ background: '#1A237E', color: '#E5E7EB', fontFamily: 'system-ui, sans-serif' }}>
+    <footer style={{ background: '#212121', color: '#E5E7EB', fontFamily: 'system-ui, sans-serif' }}>
       {/* Gov logos strip */}
       <div style={{ background: 'rgba(0,0,0,0.15)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 24px' }}>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center', overflowX: 'auto', flexWrap: 'wrap' }}>
           <span style={{ fontSize: 11, color: '#9CA3AF', whiteSpace: 'nowrap', marginRight: 8, fontWeight: 600 }}>GOV PORTALS:</span>
           {govLogos.map((g, i) => (
-            <div key={i} style={{
+            <div key={i} role="button" tabIndex={0} aria-label={g} style={{
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
               padding: '5px 14px', borderRadius: 3, fontSize: 11, color: '#D1D5DB', cursor: 'pointer', whiteSpace: 'nowrap',
               transition: 'background 0.15s'
             }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,124,0,0.2)'}
               onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault() } }}
             >{g}</div>
           ))}
         </div>
@@ -69,7 +70,7 @@ export default function MegaFooter() {
               <div key={ii}>
                 {ii === 0
                   ? <div style={{ fontSize: 12, fontWeight: 800, color: '#F57C00', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(245,124,0,0.3)' }}>{item.label}</div>
-                  : <Link to={item.path || '/'} style={{ display: 'block', fontSize: 12, color: '#D1D5DB', marginBottom: 7, textDecoration: 'none', lineHeight: 1.4, transition: 'color 0.15s' }}
+                  : <Link to={item.path || '/'} aria-label={item.label} style={{ display: 'block', fontSize: 12, color: '#D1D5DB', marginBottom: 7, textDecoration: 'none', lineHeight: 1.4, transition: 'color 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.color = '#FFFFFF'}
                     onMouseLeave={e => e.currentTarget.style.color = '#D1D5DB'}
                   >{item.label}</Link>
@@ -86,12 +87,13 @@ export default function MegaFooter() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 600 }}>Follow Us:</span>
             {socials.map((s, i) => (
-              <span key={i} style={{
+              <span key={i} role="button" tabIndex={0} aria-label={`Follow on ${s}`} style={{
                 fontSize: 11, background: 'rgba(255,255,255,0.05)', color: '#D1D5DB',
                 padding: '3px 10px', borderRadius: 3, cursor: 'pointer', transition: 'background 0.15s'
               }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,124,0,0.2)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault() } }}
               >{s}</span>
             ))}
           </div>

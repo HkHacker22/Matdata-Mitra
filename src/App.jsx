@@ -11,6 +11,8 @@ const QRGenerator = lazy(() => import('./pages/QRGenerator'))
 const BoothLocator = lazy(() => import('./pages/BoothLocator'))
 const Complaint = lazy(() => import('./pages/Complaint'))
 const BLODashboard = lazy(() => import('./pages/BLODashboard'))
+const ElectionDashboard = lazy(() => import('./pages/ElectionDashboard'))
+const Notifications = lazy(() => import('./pages/Notifications'))
 
 const theme = createTheme({
   palette: {
@@ -62,6 +64,8 @@ function App() {
             <Route path="booth-locator" element={<BoothLocator />} />
             <Route path="complaint" element={<Complaint />} />
             <Route path="blo-dashboard" element={<BLODashboard />} />
+            <Route path="elections" element={<ElectionDashboard />} />
+            <Route path="notifications" element={<Notifications />} />
           </Route>
         </Routes>
       </Suspense>

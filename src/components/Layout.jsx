@@ -23,6 +23,9 @@ import QrCodeIcon from '@mui/icons-material/QrCode'
 import MapIcon from '@mui/icons-material/Map'
 import WarningIcon from '@mui/icons-material/Warning'
 import DashboardIcon from '@mui/icons-material/Dashboard'
+import HowToVoteIcon from '@mui/icons-material/HowToVote'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const navItems = [
   { label: 'Home', path: '/', icon: <HomeIcon /> },
@@ -31,19 +34,22 @@ const navItems = [
   { label: 'QR Generator', path: '/qr-generator', icon: <QrCodeIcon /> },
   { label: 'Booth Locator', path: '/booth-locator', icon: <MapIcon /> },
   { label: 'Complaint', path: '/complaint', icon: <WarningIcon /> },
+  { label: 'Elections', path: '/elections', icon: <HowToVoteIcon /> },
   { label: 'BLO Dashboard', path: '/blo-dashboard', icon: <DashboardIcon /> },
+  { label: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
 ]
 
 function Header({ onMenuClick }) {
   const location = useLocation()
   
   return (
-    <AppBar position="sticky" sx={{ bgcolor: '#1A237E' }}>
+    <AppBar position="sticky" sx={{ bgcolor: '#D32F2F' }}>
       <Toolbar>
         {onMenuClick && (
           <IconButton
             color="inherit"
             edge="start"
+            aria-label="Open navigation menu"
             onClick={onMenuClick}
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
@@ -94,6 +100,9 @@ function Header({ onMenuClick }) {
             </Button>
           ))}
         </Box>
+        <Box sx={{ ml: 2 }}>
+          <LanguageSwitcher />
+        </Box>
       </Toolbar>
     </AppBar>
   )
@@ -104,7 +113,7 @@ function Footer() {
     <Box
       component="footer"
       sx={{
-        bgcolor: '#1A237E',
+        bgcolor: '#212121',
         color: 'white',
         py: 3,
         px: 2,
@@ -145,6 +154,7 @@ function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const location = useLocation()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -152,7 +162,7 @@ function Layout() {
 
   const drawer = (
     <Box sx={{ width: 250, pt: 2 }}>
-      <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: '#1A237E' }}>
+      <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: '#D32F2F' }}>
         Matdata Mitra
       </Typography>
       <List>

@@ -17,7 +17,24 @@ export default function HeroSection() {
   }
 
   return (
-    <div style={{ background: '#1A237E', color: '#FFFFFF', padding: '0 0 0 0' }}>
+    <div style={{ background: '#D32F2F', color: '#FFFFFF', padding: '0 0 0 0' }}>
+      <style>
+        {`
+          @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+          }
+          .ticker-content {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+          }
+          .ticker-content:hover {
+            animation-play-state: paused;
+          }
+        `}
+      </style>
       {/* Tricolor top stripe */}
       <div style={tricolorStripe} />
 
@@ -28,7 +45,7 @@ export default function HeroSection() {
             width: 48, height: 48, borderRadius: '50%',
             background: '#FFFFFF',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, fontWeight: 900, color: '#1A237E', border: '2px solid #E5E7EB'
+            fontSize: 22, fontWeight: 900, color: '#D32F2F', border: '2px solid #E5E7EB'
           }}>🗳</div>
           <div>
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: 1, fontFamily: 'Georgia, serif' }}>Matdata Mitra</div>
@@ -46,17 +63,19 @@ export default function HeroSection() {
       </div>
 
       {/* Ticker */}
-      <div style={{ background: '#F8F9FA', color: '#1F2937', padding: '5px 24px', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #E5E7EB' }}>
-        <span style={{ background: '#1A237E', color: '#FFFFFF', padding: '2px 8px', borderRadius: 2, fontSize: 11, whiteSpace: 'nowrap' }}>LATEST</span>
-        <marquee style={{ flex: 1, color: '#6B7280', fontWeight: 500 }}>
-          Assembly Elections 2024 scheduled | Last date for voter registration: May 15 | Electoral rolls updated | Check your name in voter list | Report issues at our helpline 1950
-        </marquee>
+      <div style={{ background: '#F8F9FA', color: '#1F2937', padding: '5px 24px', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #E5E7EB', overflow: 'hidden' }}>
+        <span style={{ background: '#D32F2F', color: '#FFFFFF', padding: '2px 8px', borderRadius: 2, fontSize: 11, whiteSpace: 'nowrap', zIndex: 1 }}>LATEST</span>
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+          <div className="ticker-content" style={{ color: '#6B7280', fontWeight: 500 }}>
+            Assembly Elections 2024 scheduled | Last date for voter registration: May 15 | Electoral rolls updated | Check your name in voter list | Report issues at our helpline 1950
+          </div>
+        </div>
       </div>
 
       {/* Hero search */}
       <div style={{ padding: '36px 24px 40px', textAlign: 'center', background: '#F8F9FA', color: '#1F2937', borderBottom: '1px solid #E5E7EB' }}>
         <div style={{ fontSize: 13, color: '#6B7280', letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6, fontWeight: 600 }}>भारत निर्वाचन आयोग</div>
-        <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.8rem)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'Georgia, serif', letterSpacing: -0.5, color: '#1A237E' }}>
+        <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.8rem)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'Georgia, serif', letterSpacing: -0.5, color: '#D32F2F' }}>
           मतदान मित्र
         </h1>
         <div style={{ fontSize: 15, color: '#6B7280', marginBottom: 28 }}>Your Complete Election Services Portal</div>
@@ -66,12 +85,13 @@ export default function HeroSection() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search by name, EPIC number, or address..."
+            aria-label="Search by name, EPIC number, or address"
             style={{
               flex: 1, padding: '14px 20px', fontSize: 14, border: 'none', outline: 'none',
               color: '#1F2937', background: '#FFFFFF'
             }}
           />
-          <button type="submit" style={{
+          <button type="submit" aria-label="Submit search query" style={{
             background: '#F57C00', color: '#FFFFFF', border: 'none', padding: '14px 24px',
             fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap'
           }}>
@@ -95,7 +115,7 @@ export default function HeroSection() {
           { num: '4031', label: 'Assembly Seats' },
         ].map((s, i) => (
           <div key={i} style={{ borderRight: i < 3 ? '1px solid #E5E7EB' : 'none', padding: '6px 0' }}>
-            <div style={{ fontSize: 'clamp(1rem, 3vw, 1.6rem)', fontWeight: 900, color: '#1A237E', lineHeight: 1.1 }}>{s.num}</div>
+            <div style={{ fontSize: 'clamp(1rem, 3vw, 1.6rem)', fontWeight: 900, color: '#D32F2F', lineHeight: 1.1 }}>{s.num}</div>
             <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2, fontWeight: 500 }}>{s.label}</div>
           </div>
         ))}
