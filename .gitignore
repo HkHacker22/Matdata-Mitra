@@ -33,3 +33,4 @@ pnpm-debug.log*
 # PWA
 dist-*/
 .service-workers/
+node_modules

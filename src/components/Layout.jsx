@@ -38,7 +38,7 @@ function Header({ onMenuClick }) {
   const location = useLocation()
   
   return (
-    <AppBar position="sticky" sx={{ bgcolor: '#000080' }}>
+    <AppBar position="sticky" sx={{ bgcolor: '#1A237E' }}>
       <Toolbar>
         {onMenuClick && (
           <IconButton
@@ -67,7 +67,7 @@ function Header({ onMenuClick }) {
           <Box
             component="span"
             sx={{
-              bgcolor: '#FF9933',
+              bgcolor: '#F57C00',
               color: 'white',
               px: 1,
               py: 0.25,
@@ -87,7 +87,7 @@ function Header({ onMenuClick }) {
               to={item.path}
               color="inherit"
               sx={{
-                bgcolor: location.pathname === item.path ? 'rgba(255,153,51,0.2)' : 'transparent',
+                bgcolor: location.pathname === item.path ? 'rgba(245,124,0,0.2)' : 'transparent',
               }}
             >
               {item.label}
@@ -104,7 +104,7 @@ function Footer() {
     <Box
       component="footer"
       sx={{
-        bgcolor: '#000080',
+        bgcolor: '#1A237E',
         color: 'white',
         py: 3,
         px: 2,
@@ -123,7 +123,7 @@ function Footer() {
         }}
       >
         <Typography variant="body2">
-          © 2024 Matdata Mitra. Government of India.
+          © 2026 Matdata Mitra. Government of India.
         </Typography>
         <Box sx={{ display: 'flex', gap: 3 }}>
           <Typography variant="body2" component={Link} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
@@ -152,7 +152,7 @@ function Layout() {
 
   const drawer = (
     <Box sx={{ width: 250, pt: 2 }}>
-      <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: '#000080' }}>
+      <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: '#1A237E' }}>
         Matdata Mitra
       </Typography>
       <List>
@@ -165,10 +165,10 @@ function Layout() {
             sx={{
               color: 'inherit',
               textDecoration: 'none',
-              '&:hover': { bgcolor: 'rgba(255,153,51,0.1)' },
+              '&:hover': { bgcolor: 'rgba(245,124,0,0.1)' },
             }}
           >
-            <ListItemIcon sx={{ color: '#FF9933' }}>{item.icon}</ListItemIcon>
+            <ListItemIcon sx={{ color: '#F57C00' }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.label} />
           </ListItem>
         ))}
@@ -197,7 +197,8 @@ function Layout() {
           <Outlet />
         </Box>
       </Box>
-      <Footer />
+      {/* Footer disabled here, rendered by Home page itself now, but keeping component for other pages if needed. We'll hide it if we are on root '/' */}
+      {location.pathname !== '/' && <Footer />}
     </Box>
   )
 }

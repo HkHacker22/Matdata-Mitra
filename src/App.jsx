@@ -1,13 +1,16 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
+import { ThemeProvider, createTheme, CssBaseline, Box, CircularProgress } from '@mui/material'
 import Layout from './components/Layout'
-import Home from './pages/Home'
-import VoterSearch from './pages/VoterSearch'
-import QRScanner from './pages/QRScanner'
-import QRGenerator from './pages/QRGenerator'
-import BoothLocator from './pages/BoothLocator'
-import Complaint from './pages/Complaint'
-import BLODashboard from './pages/BLODashboard'
+
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'))
+const VoterSearch = lazy(() => import('./pages/VoterSearch'))
+const QRScanner = lazy(() => import('./pages/QRScanner'))
+const QRGenerator = lazy(() => import('./pages/QRGenerator'))
+const BoothLocator = lazy(() => import('./pages/BoothLocator'))
+const Complaint = lazy(() => import('./pages/Complaint'))
+const BLODashboard = lazy(() => import('./pages/BLODashboard'))
 
 const theme = createTheme({
   palette: {
@@ -39,21 +42,29 @@ const theme = createTheme({
   },
 })
 
+const Loading = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+    <CircularProgress sx={{ color: '#FF9933' }} />
+  </Box>
+)
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Layout>
+      <Suspense fallback={<Loading />}>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/voter-search" element={<VoterSearch />} />
-          <Route path="/qr-scanner" element={<QRScanner />} />
-          <Route path="/qr-generator" element={<QRGenerator />} />
-          <Route path="/booth-locator" element={<BoothLocator />} />
-          <Route path="/complaint" element={<Complaint />} />
-          <Route path="/blo-dashboard" element={<BLODashboard />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="voter-search" element={<VoterSearch />} />
+            <Route path="qr-scanner" element={<QRScanner />} />
+            <Route path="qr-generator" element={<QRGenerator />} />
+            <Route path="booth-locator" element={<BoothLocator />} />
+            <Route path="complaint" element={<Complaint />} />
+            <Route path="blo-dashboard" element={<BLODashboard />} />
+          </Route>
         </Routes>
-      </Layout>
+      </Suspense>
     </ThemeProvider>
   )
 }
