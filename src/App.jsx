@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import React, { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { ThemeProvider, createTheme, CssBaseline, Box, CircularProgress } from '@mui/material'
 import Layout from './components/Layout'

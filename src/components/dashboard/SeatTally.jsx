@@ -1,3 +1,4 @@
+import React from 'react'
 import { Box, Typography, LinearProgress, Card, CardContent } from '@mui/material'
 
 function SeatTally({ seats = [], title = 'Seat Tally' }) {
