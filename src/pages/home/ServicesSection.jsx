@@ -31,21 +31,21 @@ export default function ServicesSection() {
         padding: '10px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         borderTop: '1px solid #E5E7EB'
       }}>
-        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#1A237E', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#D32F2F', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>
           🏛 Online Services
         </h2>
-        <span style={{ fontSize: 12, color: '#F57C00', cursor: 'pointer', fontWeight: 600 }}>View All ›</span>
+        <button aria-label="View all online services" style={{ fontSize: 12, color: '#F57C00', cursor: 'pointer', fontWeight: 600, background: 'none', border: 'none', padding: 0 }}>View All ›</button>
       </div>
 
       {/* Services grid */}
       <div style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
         {services.map((s, i) => (
-          <Link key={i} to={s.path} style={{ textDecoration: 'none' }}>
+          <Link key={i} to={s.path} aria-label={s.title} style={{ textDecoration: 'none' }}>
             <div style={{
               background: '#FFFFFF', borderRadius: 6, padding: '14px 10px', textAlign: 'center',
               border: '1px solid #E5E7EB', cursor: 'pointer', transition: 'transform 0.15s, border-color 0.15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#1A237E' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#D32F2F' }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#E5E7EB' }}
             >
               <div style={{ fontSize: 28, marginBottom: 6 }}>{s.icon}</div>
@@ -60,9 +60,9 @@ export default function ServicesSection() {
       <div style={{ padding: '0 16px 12px' }}>
         <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 6, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', textAlign: 'center', padding: '12px 0' }}>
           {extLinks.map((e, i) => (
-            <div key={i} style={{ borderRight: i < 3 ? '1px solid #E5E7EB' : 'none', cursor: 'pointer', padding: '4px 0' }}>
+            <div key={i} role="button" tabIndex={0} aria-label={e.label} style={{ borderRight: i < 3 ? '1px solid #E5E7EB' : 'none', cursor: 'pointer', padding: '4px 0' }}>
               <div style={{ fontSize: 22, marginBottom: 4 }}>{e.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#1A237E' }}>{e.label}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#D32F2F' }}>{e.label}</div>
               <div style={{ fontSize: 10, color: '#6B7280' }}>{e.sub}</div>
             </div>
           ))}

@@ -25,6 +25,7 @@ import WarningIcon from '@mui/icons-material/Warning'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import HowToVoteIcon from '@mui/icons-material/HowToVote'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const navItems = [
   { label: 'Home', path: '/', icon: <HomeIcon /> },
@@ -42,7 +43,7 @@ function Header({ onMenuClick }) {
   const location = useLocation()
   
   return (
-    <AppBar position="sticky" sx={{ bgcolor: '#000080' }}>
+    <AppBar position="sticky" sx={{ bgcolor: '#D32F2F' }}>
       <Toolbar>
         {onMenuClick && (
           <IconButton
@@ -99,6 +100,9 @@ function Header({ onMenuClick }) {
             </Button>
           ))}
         </Box>
+        <Box sx={{ ml: 2 }}>
+          <LanguageSwitcher />
+        </Box>
       </Toolbar>
     </AppBar>
   )
@@ -150,6 +154,7 @@ function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const location = useLocation()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
