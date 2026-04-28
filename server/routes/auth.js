@@ -18,21 +18,42 @@ router.post('/verify-token', async (req, res) => {
       return res.status(400).json({ error: 'uid is required' })
     }
 
-    // Upsert user in MongoDB
-    const user = await User.findOneAndUpdate(
-      { uid },
-      {
+    // 1. Check if user already exists
+    let user = await User.findOne({ uid })
+
+    // 2. Role Security Check
+    if (role === 'blo' || (user && user.role === 'blo')) {
+      // If user doesn't exist yet, they cannot register as a BLO via this endpoint
+      if (!user) {
+        return res.status(403).json({ error: 'Unauthorized. BLO accounts must be pre-registered.' })
+      }
+      // If they exist but aren't a BLO in the DB, reject the request to change role to BLO
+      if (user.role !== 'blo') {
+         return res.status(403).json({ error: 'Access denied. You do not have BLO privileges.' })
+      }
+    }
+
+    // 3. Upsert for Citizens, Update for existing BLOs
+    if (!user) {
+      // Create new Citizen
+      user = await User.create({
         uid,
         name: name || '',
         email: email || '',
         phone: phone || '',
-        role: role || 'citizen',
+        role: 'citizen', // Force citizen role for new registrations
         lastLogin: new Date(),
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    )
+      })
+    } else {
+      // Update existing user (Citizen or BLO)
+      user.name = name || user.name
+      user.email = email || user.email
+      user.phone = phone || user.phone
+      user.lastLogin = new Date()
+      await user.save()
+    }
 
-    // Generate JWT for the session
+    // 4. Generate JWT
     const token = jwt.sign(
       {
         uid: user.uid,

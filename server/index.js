@@ -26,6 +26,14 @@ app.use(morgan('dev'))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
 
+// Prevent directory enumeration and block access to dotfiles
+app.use((req, res, next) => {
+  if (req.url.split('/').some(part => part.startsWith('.'))) {
+    return res.status(403).json({ error: 'Access denied' })
+  }
+  next()
+})
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -53,6 +61,11 @@ app.use('/api/notifications', notificationRoutes)
 // ─── 404 Handler ──────────────────────────────────────
 app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' })
+})
+
+// Global catch-all to prevent directory listing or information leakage on other paths
+app.all('*', (req, res) => {
+  res.status(403).json({ error: 'Access forbidden' })
 })
 
 // ─── Error Handler ────────────────────────────────────

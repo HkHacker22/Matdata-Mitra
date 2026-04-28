@@ -1,125 +1,99 @@
 import React from 'react'
-const news = [
+import { Box, Typography, Divider } from '@mui/material'
+
+const newsItems = [
   {
     date: '27 Apr 2026',
-    category: 'Election News',
-    title: 'ECI Announces Schedule for State Assembly Elections 2026',
-    desc: 'The Election Commission of India has released the detailed schedule for upcoming assembly elections across five states.',
-    tag: 'NEW',
+    title: 'ECI Announces Schedule for State Assembly Elections...',
+    description: 'ECI Announces Schedule for State Assembly Elections, short insuraments and/ors for State Assembly Elections in four States...',
   },
   {
     date: '25 Apr 2026',
-    category: 'Press Release',
-    title: 'Voter Enrollment Drive: 1.2 Crore New Voters Added to Electoral Roll',
-    desc: 'Special summary revision of electoral rolls concluded with record enrollment of first-time voters aged 18-19.',
-    tag: '',
-  },
-  {
-    date: '23 Apr 2026',
-    category: 'Notice',
-    title: 'Model Code of Conduct in Force in Poll-Bound States',
-    desc: 'MCC comes into effect immediately upon announcement of election schedule in all five poll-bound states.',
-    tag: '',
+    title: 'Voter Enrollment Drive: 1.2 Crore New Voters...',
+    description: 'Voter Enrollment Drive: 1.2 Crore New Voters, se-tarsos that\'s meturified by Commission Board esam and/w vote organizes...',
   },
   {
     date: '20 Apr 2026',
-    category: 'Notification',
-    title: 'SVEEP Initiative: "No Voter Left Behind" Campaign Launched Nationwide',
-    desc: 'ECI launches nationwide campaign to boost voter turnout, targeting urban apathetic voters and remote constituencies.',
-    tag: '',
+    title: 'SVEEP Initiative: "No Voter Left Behind" Campaign...',
+    description: 'SVEEP Initiative "No Voter Left Behind" Campaign, senovanise voter intilimet in the mroarit of used and services...',
   },
-  {
-    date: '18 Apr 2026',
-    category: 'Order',
-    title: 'Guidelines for Use of AI-Generated Content in Election Campaigns Issued',
-    desc: 'Commission issues comprehensive guidelines for political parties on use of AI and deepfakes in election propaganda.',
-    tag: '',
-  },
-]
-
-const pressReleases = [
-  { date: '26 Apr 2026', title: 'ECI Directs States to Ensure PwD-Friendly Polling Stations' },
-  { date: '24 Apr 2026', title: 'Commission Reviews Preparedness with All State CEOs' },
-  { date: '22 Apr 2026', title: 'Training of Polling Officers: Phase II Completed' },
-  { date: '19 Apr 2026', title: 'EVM Randomization Completed for Upcoming Elections' },
 ]
 
 export default function NewsSection() {
   return (
-    <div style={{ background: '#F8F9FA', padding: '0 0 8px' }}>
-      <div style={{
-        background: '#FFFFFF', borderBottom: '3px solid #D32F2F',
-        padding: '10px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderTop: '1px solid #E5E7EB'
-      }}>
-        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#D32F2F', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          📰 News / Press Releases
-        </h2>
-        <div style={{ display: 'flex', gap: 12, fontSize: 12 }}>
-          <button style={{ color: '#D32F2F', fontWeight: 700, cursor: 'pointer', borderBottom: '2px solid #F57C00', paddingBottom: 2, background: 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>All News</button>
-          <button style={{ color: '#6B7280', cursor: 'pointer', background: 'none', border: 'none' }}>Press Releases</button>
-          <button style={{ color: '#6B7280', cursor: 'pointer', background: 'none', border: 'none' }}>Orders</button>
-        </div>
-      </div>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3 }, py: { xs: 4, md: 6 } }}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: 800, color: '#1f2937', mb: 4, fontSize: { xs: '1.5rem', md: '2rem' } }}
+      >
+        Latest News & Updates
+      </Typography>
 
-      <div style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 300px', gap: 12 }}>
-        {/* Main news */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: '1px solid #E5E7EB', borderRadius: 4, overflow: 'hidden' }}>
-          {news.map((n, i) => (
-            <div key={i} role="button" tabIndex={0} aria-label={n.title} style={{
-              background: '#FFFFFF', borderBottom: i < news.length - 1 ? '1px solid #E5E7EB' : 'none', padding: '12px 16px', cursor: 'pointer',
-              display: 'flex', gap: 12, alignItems: 'flex-start', textAlign: 'left',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = '#F8F9FA'}
-              onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault() } }}
+      <Box sx={{ bgcolor: '#fff', borderRadius: 3, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+        {newsItems.map((item, index) => (
+          <Box key={index}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: { xs: 2, sm: 4 },
+                p: { xs: 2, sm: 3 },
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+                '&:hover': { bgcolor: '#f9fafb' },
+              }}
             >
-              <div style={{ minWidth: 4, height: '100%', background: '#F57C00', borderRadius: 2 }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, background: '#F3F4F6', color: '#D32F2F', padding: '2px 6px', borderRadius: 2, fontWeight: 600, border: '1px solid #E5E7EB' }}>{n.category}</span>
-                  {n.tag && <span style={{ fontSize: 10, background: '#F57C00', color: '#FFFFFF', padding: '2px 6px', borderRadius: 2, fontWeight: 700 }}>{n.tag}</span>}
-                  <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 'auto' }}>{n.date}</span>
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#1F2937', marginBottom: 4, lineHeight: 1.3 }}>{n.title}</div>
-                <div style={{ fontSize: 11, color: '#6B7280', lineHeight: 1.4 }}>{n.desc}</div>
-              </div>
-            </div>
-          ))}
-          <div style={{ padding: '10px 16px', background: '#F8F9FA', textAlign: 'center', borderTop: '1px solid #E5E7EB' }}>
-            <button style={{ fontSize: 12, color: '#D32F2F', fontWeight: 700, cursor: 'pointer', background: 'none', border: 'none' }}>View All News & Press Releases →</button>
-          </div>
-        </div>
+              {/* Date */}
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#16a34a',
+                  fontWeight: 600,
+                  minWidth: { xs: 70, sm: 100 },
+                  flexShrink: 0,
+                  fontSize: '0.85rem',
+                }}
+              >
+                {item.date}
+              </Typography>
 
-        {/* Press releases sidebar */}
-        <div>
-          <div style={{ background: '#FFFFFF', borderRadius: 4, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
-            <div style={{ background: '#F8F9FA', color: '#D32F2F', padding: '10px 14px', fontSize: 13, fontWeight: 700, borderBottom: '1px solid #E5E7EB' }}>
-              📋 Quick Links
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {pressReleases.map((p, i) => (
-                <div key={i} role="button" tabIndex={0} aria-label={p.title} style={{ padding: '10px 14px', borderBottom: i < pressReleases.length - 1 ? '1px solid #E5E7EB' : 'none', cursor: 'pointer', textAlign: 'left' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F8F9FA'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
-                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault() } }}
+              {/* Content */}
+              <Box>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#1f2937',
+                    mb: 0.5,
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                  }}
                 >
-                  <div style={{ fontSize: 10, color: '#F57C00', fontWeight: 700, marginBottom: 2 }}>{p.date}</div>
-                  <div style={{ fontSize: 12, color: '#1F2937', lineHeight: 1.3 }}>{p.title}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+                  {item.title}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#6b7280', lineHeight: 1.5 }}>
+                  {item.description}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#9ca3af', mt: 0.5, display: 'block' }}>
+                  {item.date}
+                </Typography>
+              </Box>
+            </Box>
+            {index < newsItems.length - 1 && <Divider />}
+          </Box>
+        ))}
+      </Box>
 
-          {/* Alert box */}
-          <div style={{ marginTop: 10, background: '#FFFFFF', border: '1px solid #F57C00', borderRadius: 4, padding: '12px 14px', borderLeft: '4px solid #F57C00' }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#1F2937', marginBottom: 6 }}>⚠️ Important Notice</div>
-            <div style={{ fontSize: 11, color: '#6B7280', lineHeight: 1.4 }}>
-              Bring Voter ID (EPIC) to polling station. Voting hours: <strong>7:00 AM – 6:00 PM</strong>. Helpline: <strong style={{ color: '#D32F2F' }}>1950</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Typography
+        variant="body2"
+        sx={{
+          color: '#16a34a',
+          fontWeight: 600,
+          mt: 2,
+          cursor: 'pointer',
+          '&:hover': { textDecoration: 'underline' },
+        }}
+      >
+        View All News
+      </Typography>
+    </Box>
   )
 }

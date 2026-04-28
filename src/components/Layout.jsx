@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
@@ -16,92 +16,150 @@ import {
   useTheme,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
-import HomeIcon from '@mui/icons-material/Home'
+import CloseIcon from '@mui/icons-material/Close'
 import SearchIcon from '@mui/icons-material/Search'
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices'
+import NewspaperIcon from '@mui/icons-material/Newspaper'
+import ContactMailIcon from '@mui/icons-material/ContactMail'
+import LoginIcon from '@mui/icons-material/Login'
+import FacebookIcon from '@mui/icons-material/Facebook'
+import TwitterIcon from '@mui/icons-material/Twitter'
+import InstagramIcon from '@mui/icons-material/Instagram'
+import LinkedInIcon from '@mui/icons-material/LinkedIn'
+import BadgeIcon from '@mui/icons-material/Badge'
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
-import QrCodeIcon from '@mui/icons-material/QrCode'
-import MapIcon from '@mui/icons-material/Map'
-import WarningIcon from '@mui/icons-material/Warning'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import HowToVoteIcon from '@mui/icons-material/HowToVote'
-import NotificationsIcon from '@mui/icons-material/Notifications'
 import LanguageSwitcher from './LanguageSwitcher'
 
-const navItems = [
-  { label: 'Home', path: '/', icon: <HomeIcon /> },
+const citizenNavItems = [
   { label: 'Voter Search', path: '/voter-search', icon: <SearchIcon /> },
+  { label: 'Services', path: '/booth-locator', icon: <MiscellaneousServicesIcon /> },
+  { label: 'News', path: '/notifications', icon: <NewspaperIcon /> },
+  { label: 'Contact', path: '/complaint', icon: <ContactMailIcon /> },
+]
+
+const bloNavItems = [
+  { label: 'BLO Dashboard', path: '/blo-dashboard', icon: <BadgeIcon /> },
   { label: 'QR Scanner', path: '/qr-scanner', icon: <QrCodeScannerIcon /> },
-  { label: 'QR Generator', path: '/qr-generator', icon: <QrCodeIcon /> },
-  { label: 'Booth Locator', path: '/booth-locator', icon: <MapIcon /> },
-  { label: 'Complaint', path: '/complaint', icon: <WarningIcon /> },
-  { label: 'Elections', path: '/elections', icon: <HowToVoteIcon /> },
-  { label: 'BLO Dashboard', path: '/blo-dashboard', icon: <DashboardIcon /> },
-  { label: 'Notifications', path: '/notifications', icon: <NotificationsIcon /> },
+  { label: 'Complaints', path: '/complaint', icon: <ContactMailIcon /> },
+  { label: 'Booth Info', path: '/booth-locator', icon: <MiscellaneousServicesIcon /> },
 ]
 
 function Header({ onMenuClick }) {
   const location = useLocation()
-  
+  const navigate = useNavigate()
+  const isLoggedIn = !!localStorage.getItem('authToken')
+  const userRole = localStorage.getItem('userRole') || 'citizen'
+
   return (
-    <AppBar position="sticky" sx={{ bgcolor: '#D32F2F' }}>
-      <Toolbar>
+    <AppBar
+      position="sticky"
+      elevation={1}
+      sx={{
+        bgcolor: '#ffffff',
+        color: '#1f2937',
+        borderBottom: '1px solid #e5e7eb',
+      }}
+    >
+      <Toolbar sx={{ maxWidth: 1200, width: '100%', mx: 'auto', px: { xs: 1, sm: 2 } }}>
         {onMenuClick && (
           <IconButton
-            color="inherit"
             edge="start"
             aria-label="Open navigation menu"
             onClick={onMenuClick}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            sx={{ mr: 1, display: { md: 'none' }, color: '#1f2937' }}
           >
             <MenuIcon />
           </IconButton>
         )}
-        <Typography
-          variant="h6"
+
+        {/* Logo */}
+        <Box
           component={Link}
           to="/"
           sx={{
-            flexGrow: 1,
-            textDecoration: 'none',
-            color: 'inherit',
-            fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
             gap: 1,
+            textDecoration: 'none',
+            color: 'inherit',
+            flexGrow: { xs: 1, md: 0 },
+            mr: { md: 4 },
           }}
         >
           <Box
-            component="span"
-            sx={{
-              bgcolor: '#F57C00',
-              color: 'white',
-              px: 1,
-              py: 0.25,
-              borderRadius: 1,
-              fontSize: '0.875rem',
-            }}
-          >
-            मतदान
-          </Box>
-          Matdata Mitra
-        </Typography>
-        <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-          {navItems.slice(1).map((item) => (
+            component="img"
+            src="/images/logo only.jpeg"
+            alt="Matdata Mitra"
+            sx={{ height: 36, borderRadius: '50%' }}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1.1rem' }}>
+            Matdata Mitra
+          </Typography>
+        </Box>
+
+        {/* Desktop Nav */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, flexGrow: 1 }}>
+          {(userRole === 'blo' ? bloNavItems : citizenNavItems).map((item) => (
             <Button
               key={item.path}
               component={Link}
               to={item.path}
-              color="inherit"
               sx={{
-                bgcolor: location.pathname === item.path ? 'rgba(245,124,0,0.2)' : 'transparent',
+                color: location.pathname === item.path ? '#16a34a' : '#4b5563',
+                fontWeight: location.pathname === item.path ? 700 : 500,
+                textTransform: 'none',
+                fontSize: '0.9rem',
+                '&:hover': { color: '#16a34a', bgcolor: 'transparent' },
               }}
             >
               {item.label}
             </Button>
           ))}
         </Box>
-        <Box sx={{ ml: 2 }}>
+
+        {/* Right side */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LanguageSwitcher />
+          {!isLoggedIn && (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<LoginIcon />}
+              onClick={() => navigate('/login')}
+              sx={{
+                bgcolor: '#16a34a',
+                textTransform: 'none',
+                fontWeight: 600,
+                borderRadius: 50,
+                px: 2,
+                display: { xs: 'none', sm: 'flex' },
+                '&:hover': { bgcolor: '#15803d' },
+              }}
+            >
+              Login
+            </Button>
+          )}
+          {isLoggedIn && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => {
+                localStorage.removeItem('authToken')
+                localStorage.removeItem('userRole')
+                navigate('/login')
+              }}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                borderRadius: 50,
+                borderColor: '#d1d5db',
+                color: '#6b7280',
+                display: { xs: 'none', sm: 'flex' },
+              }}
+            >
+              Logout
+            </Button>
+          )}
         </Box>
       </Toolbar>
     </AppBar>
@@ -113,8 +171,8 @@ function Footer() {
     <Box
       component="footer"
       sx={{
-        bgcolor: '#212121',
-        color: 'white',
+        bgcolor: '#f9fafb',
+        borderTop: '1px solid #e5e7eb',
         py: 3,
         px: 2,
         mt: 'auto',
@@ -131,21 +189,28 @@ function Footer() {
           gap: 2,
         }}
       >
-        <Typography variant="body2">
-          © 2026 Matdata Mitra. Government of India.
-        </Typography>
         <Box sx={{ display: 'flex', gap: 3 }}>
-          <Typography variant="body2" component={Link} to="/" sx={{ color: 'white', textDecoration: 'none' }}>
-            Home
-          </Typography>
-          <Typography variant="body2" component={Link} to="/complaint" sx={{ color: 'white', textDecoration: 'none' }}>
-            Help
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'white' }}>
-            Privacy Policy
-          </Typography>
+          {['About ECI', 'Contact Us', 'Privacy Policy', 'Terms of Use'].map((item) => (
+            <Typography
+              key={item}
+              variant="body2"
+              sx={{ color: '#6b7280', cursor: 'pointer', '&:hover': { color: '#16a34a' } }}
+            >
+              {item}
+            </Typography>
+          ))}
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          {[FacebookIcon, TwitterIcon, InstagramIcon, LinkedInIcon].map((Icon, i) => (
+            <IconButton key={i} size="small" sx={{ color: '#6b7280', '&:hover': { color: '#16a34a' } }}>
+              <Icon fontSize="small" />
+            </IconButton>
+          ))}
         </Box>
       </Box>
+      <Typography variant="body2" sx={{ textAlign: 'center', mt: 2, color: '#9ca3af', fontSize: '0.8rem' }}>
+        © 2026 Matdata Mitra - Election Commission of India.
+      </Typography>
     </Box>
   )
 }
@@ -153,41 +218,70 @@ function Footer() {
 function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const location = useLocation()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const navigate = useNavigate()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
+  
+  const userRole = localStorage.getItem('userRole') || 'citizen'
 
   const drawer = (
-    <Box sx={{ width: 250, pt: 2 }}>
-      <Typography variant="h6" sx={{ px: 2, mb: 2, fontWeight: 700, color: '#D32F2F' }}>
-        Matdata Mitra
-      </Typography>
-      <List>
-        {navItems.map((item) => (
+    <Box sx={{ width: 280, pt: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box component="img" src="/images/logo only.jpeg" alt="Logo" sx={{ height: 32, borderRadius: '50%' }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', fontSize: '1rem' }}>
+            Matdata Mitra
+          </Typography>
+        </Box>
+        <IconButton onClick={handleDrawerToggle}>
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <List sx={{ px: 1 }}>
+        {(userRole === 'blo' ? bloNavItems : citizenNavItems).map((item) => (
           <ListItem
             key={item.path}
             component={Link}
             to={item.path}
             onClick={handleDrawerToggle}
             sx={{
-              color: 'inherit',
+              borderRadius: 2,
+              mb: 0.5,
+              color: '#4b5563',
               textDecoration: 'none',
-              '&:hover': { bgcolor: 'rgba(245,124,0,0.1)' },
+              '&:hover': { bgcolor: '#f0fdf4', color: '#16a34a' },
             }}
           >
-            <ListItemIcon sx={{ color: '#F57C00' }}>{item.icon}</ListItemIcon>
+            <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.label} />
           </ListItem>
         ))}
       </List>
+      <Box sx={{ px: 2, mt: 2 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<LoginIcon />}
+          onClick={() => { handleDrawerToggle(); navigate('/login') }}
+          sx={{
+            bgcolor: '#16a34a',
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 50,
+            '&:hover': { bgcolor: '#15803d' },
+          }}
+        >
+          Login
+        </Button>
+      </Box>
     </Box>
   )
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#f9fafb' }}>
       <Header onMenuClick={isMobile ? handleDrawerToggle : null} />
       {isMobile && (
         <Drawer
@@ -195,20 +289,17 @@ function Layout() {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
-          sx={{
-            '& .MuiDrawer-paper': { width: 250 },
-          }}
+          sx={{ '& .MuiDrawer-paper': { width: 280 } }}
         >
           {drawer}
         </Drawer>
       )}
-      <Box component="main" sx={{ flexGrow: 1, py: 2, px: { xs: 2, sm: 3 } }}>
+      <Box component="main" sx={{ flexGrow: 1 }}>
         <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
           <Outlet />
         </Box>
       </Box>
-      {/* Footer disabled here, rendered by Home page itself now, but keeping component for other pages if needed. We'll hide it if we are on root '/' */}
-      {location.pathname !== '/' && <Footer />}
+      <Footer />
     </Box>
   )
 }

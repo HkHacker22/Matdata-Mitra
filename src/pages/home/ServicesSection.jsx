@@ -1,74 +1,135 @@
 import React from 'react'
+import { Box, Typography, Paper } from '@mui/material'
 import { Link } from 'react-router-dom'
+import SearchIcon from '@mui/icons-material/Search'
+import DescriptionIcon from '@mui/icons-material/Description'
+import TrackChangesIcon from '@mui/icons-material/TrackChanges'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import ReportProblemIcon from '@mui/icons-material/ReportProblem'
+import SupportAgentIcon from '@mui/icons-material/SupportAgent'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 const services = [
-  { icon: '🔍', title: 'Voter Search', desc: 'Find voter details by name, EPIC or address', path: '/voter-search' },
-  { icon: '📷', title: 'QR Scanner', desc: 'Scan voter slip QR code to verify identity', path: '/qr-scanner' },
-  { icon: '🎫', title: 'QR Generator', desc: 'Generate QR code for your voter slip', path: '/qr-generator' },
-  { icon: '📍', title: 'Booth Locator', desc: 'Find nearest polling booth with directions', path: '/booth-locator' },
-  { icon: '📝', title: 'File Complaint', desc: 'Report election-related issues', path: '/complaint' },
-  { icon: '📊', title: 'BLO Dashboard', desc: 'Booth Level Officer management portal', path: '/blo-dashboard' },
-  { icon: '🗓', title: 'Election Schedule', desc: 'View upcoming election dates and phases', path: '/voter-search' },
-  { icon: '📋', title: 'Apply for EPIC', desc: 'Apply for new Voter ID card online', path: '/voter-search' },
-  { icon: '✏️', title: 'Correction in Roll', desc: 'Update your details in voter list', path: '/voter-search' },
-  { icon: '🔀', title: 'Transfer of Entry', desc: 'Transfer voter entry to new constituency', path: '/voter-search' },
-  { icon: '🏛', title: 'Constituency Info', desc: 'Know your constituency and representative', path: '/booth-locator' },
-  { icon: '📞', title: 'Voter Helpline', desc: 'Call 1950 for election assistance', path: '/complaint' },
-]
-
-const extLinks = [
-  { icon: '🌐', label: 'CEO Portal', sub: 'Chief Electoral Officer' },
-  { icon: '📱', label: 'Voter Helpline App', sub: 'Download on Mobile' },
-  { icon: '🏛', label: 'NVP Portal', sub: 'National Voters Portal' },
-  { icon: '🗳', label: 'EVM Info', sub: 'Electronic Voting Machine' },
+  {
+    title: 'Voter Search',
+    description: 'Search and find your voter registration details and election information.',
+    icon: <SearchIcon />,
+    path: '/voter-search',
+    color: '#3b82f6',
+  },
+  {
+    title: 'Electoral Roll',
+    description: 'Electoral Roll for accessing personal election services and records.',
+    icon: <DescriptionIcon />,
+    path: '/elections',
+    color: '#ef4444',
+  },
+  {
+    title: 'Track Application',
+    description: 'Track form progress or application status for election registrations.',
+    icon: <TrackChangesIcon />,
+    path: '/notifications',
+    color: '#16a34a',
+  },
+  {
+    title: 'Polling Booth',
+    description: 'Find the locations of your nearest polling booths and voting centers.',
+    icon: <LocationOnIcon />,
+    path: '/booth-locator',
+    color: '#ec4899',
+  },
+  {
+    title: 'Complaint',
+    description: 'Report an issue or complaint to election commission authorities.',
+    icon: <ReportProblemIcon />,
+    path: '/complaint',
+    color: '#f59e0b',
+  },
+  {
+    title: 'Voter Helpline',
+    description: 'Access voter helpline services for any voting-related assistance.',
+    icon: <SupportAgentIcon />,
+    path: '/complaint',
+    color: '#8b5cf6',
+  },
 ]
 
 export default function ServicesSection() {
   return (
-    <div style={{ background: '#F8F9FA', padding: '0 0 8px' }}>
-      {/* Section header */}
-      <div style={{
-        background: '#FFFFFF', borderBottom: '3px solid #F57C00',
-        padding: '10px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderTop: '1px solid #E5E7EB'
-      }}>
-        <h2 style={{ fontSize: 17, fontWeight: 800, color: '#D32F2F', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-          🏛 Online Services
-        </h2>
-        <button aria-label="View all online services" style={{ fontSize: 12, color: '#F57C00', cursor: 'pointer', fontWeight: 600, background: 'none', border: 'none', padding: 0 }}>View All ›</button>
-      </div>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3 }, py: { xs: 4, md: 6 } }}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: 800, color: '#1f2937', mb: 4, fontSize: { xs: '1.5rem', md: '2rem' } }}
+      >
+        Online Services
+      </Typography>
 
-      {/* Services grid */}
-      <div style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
-        {services.map((s, i) => (
-          <Link key={i} to={s.path} aria-label={s.title} style={{ textDecoration: 'none' }}>
-            <div style={{
-              background: '#FFFFFF', borderRadius: 6, padding: '14px 10px', textAlign: 'center',
-              border: '1px solid #E5E7EB', cursor: 'pointer', transition: 'transform 0.15s, border-color 0.15s',
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+          gap: 3,
+        }}
+      >
+        {services.map((service) => (
+          <Paper
+            key={service.title}
+            component={Link}
+            to={service.path}
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              textDecoration: 'none',
+              color: 'inherit',
+              border: '1px solid #e5e7eb',
+              bgcolor: '#fff',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                borderColor: service.color,
+                boxShadow: `0 4px 20px ${service.color}15`,
+                transform: 'translateY(-2px)',
+              },
             }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#D32F2F' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#E5E7EB' }}
+          >
+            {/* Icon */}
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                bgcolor: `${service.color}12`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 2,
+                '& svg': { fontSize: 26, color: service.color },
+              }}
             >
-              <div style={{ fontSize: 28, marginBottom: 6 }}>{s.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#1F2937', marginBottom: 3, lineHeight: 1.2 }}>{s.title}</div>
-              <div style={{ fontSize: 10, color: '#6B7280', lineHeight: 1.3 }}>{s.desc}</div>
-            </div>
-          </Link>
-        ))}
-      </div>
+              {service.icon}
+            </Box>
 
-      {/* External portal strip */}
-      <div style={{ padding: '0 16px 12px' }}>
-        <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 6, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', textAlign: 'center', padding: '12px 0' }}>
-          {extLinks.map((e, i) => (
-            <div key={i} role="button" tabIndex={0} aria-label={e.label} style={{ borderRight: i < 3 ? '1px solid #E5E7EB' : 'none', cursor: 'pointer', padding: '4px 0' }}>
-              <div style={{ fontSize: 22, marginBottom: 4 }}>{e.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#D32F2F' }}>{e.label}</div>
-              <div style={{ fontSize: 10, color: '#6B7280' }}>{e.sub}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', mb: 1, fontSize: '1.05rem' }}>
+              {service.title}
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#6b7280', mb: 2, lineHeight: 1.5 }}>
+              {service.description}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#16a34a',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+            >
+              View More <ArrowForwardIcon sx={{ fontSize: 16 }} />
+            </Typography>
+          </Paper>
+        ))}
+      </Box>
+    </Box>
   )
 }

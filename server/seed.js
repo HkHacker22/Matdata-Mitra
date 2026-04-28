@@ -152,11 +152,7 @@ const notifications = [
 ]
 
 const demoUser = {
-  uid: 'demo-admin-001',
-  name: 'Admin User',
-  email: 'admin@matdatamitra.gov.in',
-  phone: '+91-9999999999',
-  role: 'admin',
+
 }
 
 // ─── Seed Function ────────────────────────────────────

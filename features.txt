@@ -1,0 +1,21 @@
+1. Backend Lockdown (Security Fix)
+I've updated the /api/auth/verify-token endpoint with the following strict logic:
+
+Forced Citizen Role: Any new user registering via the portal is automatically assigned the citizen role. They cannot "request" a BLO role from the frontend anymore.
+Pre-Authorization Lock: If a user tries to login via the BLO portal, the backend now checks if that user's UID already exists in the database with the blo role. If they aren't pre-authorized, they are blocked with a 403 Forbidden error, even if they have valid Firebase credentials.
+2. Role-Based Navigation
+The main website layout (Layout.jsx) is now role-aware:
+
+Citizens: See standard links (Voter Search, Services, News, Contact).
+BLOs: See a completely different menu containing the QR Scanner, BLO Dashboard, and Booth Information.
+3. How to Securely Add a BLO User
+Since BLOs cannot self-register, you must manually authorize them. I've created a helper script for this:
+
+Create the user in your Firebase Console (Authentication tab) to get their UID.
+Authorize them in your database by running this command in your terminal:
+bash
+node scripts/add-blo.js <email> <uid> <name>
+(Example: node scripts/add-blo.js blo@test.com ABC123UID "Ramesh BLO" )
+This ensures that even if a normal user finds the BLO login page, they will be rejected by the backend because their UID won't be in the "authorized BLO" list.
+
+The vulnerability is now closed. Standard users are locked into the citizen side, and BLO features are only accessible to pre-authorized accounts.
