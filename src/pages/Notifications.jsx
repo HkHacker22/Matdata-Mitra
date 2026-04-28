@@ -204,6 +204,7 @@ function Notifications() {
                           />
                         </Box>
                       }
+                      secondaryTypographyProps={{ component: 'div' }}
                       secondary={
                         <Box>
                           <Typography variant="body2" color="text.secondary">

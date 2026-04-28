@@ -26,7 +26,7 @@ router.post('/', authenticate, async (req, res) => {
     res.status(201).json(complaint)
   } catch (error) {
     console.error('Complaint creation error:', error)
-    res.status(500).json({ error: 'Failed to create complaint' })
+    res.status(500).json({ error: `Failed to create complaint: ${error.message}` })
   }
 })
 
@@ -44,9 +44,9 @@ router.get('/', authenticate, async (req, res) => {
       filter.userId = req.user.uid
     }
 
-    // BLOs see assigned complaints
+    // BLOs see assigned complaints (Temporarily allowing all complaints for demo purposes)
     if (req.user.role === 'blo') {
-      filter.assignedBlo = req.user.uid
+      // filter.assignedBlo = req.user.uid
     }
 
     // Admin sees all (no filter needed)

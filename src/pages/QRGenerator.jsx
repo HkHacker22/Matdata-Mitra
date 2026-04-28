@@ -149,7 +149,7 @@ function QRGenerator() {
                   </Typography>
                   {voters.map((voter) => (
                     <Card
-                      key={voter.id}
+                      key={voter._id}
                       sx={{
                         mb: 1,
                         cursor: 'pointer',

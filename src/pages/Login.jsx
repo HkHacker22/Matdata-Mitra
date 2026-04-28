@@ -109,7 +109,7 @@ export default function Login() {
       // Sync with backend
       const user = auth.currentUser
       const token = await user.getIdToken()
-      await fetch('/api/auth/verify-token', {
+      const response = await fetch('/api/auth/verify-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,7 +119,13 @@ export default function Login() {
           role: 'citizen',
         }),
       })
+      const data = await response.json()
       localStorage.setItem('authToken', token)
+      localStorage.setItem('userEmail', user.email || '')
+      localStorage.setItem('userRole', 'citizen')
+      if (data.user && data.user.epicId) {
+        localStorage.setItem('userEpicId', data.user.epicId)
+      }
       navigate('/')
     } catch (err) {
       setError(err.message.replace('Firebase: ', '').replace(/\(auth\/.*\)/, ''))
@@ -160,7 +166,7 @@ export default function Login() {
       const result = await confirmResult.confirm(otp)
       const user = result.user
       const token = await user.getIdToken()
-      await fetch('/api/auth/verify-token', {
+      const response = await fetch('/api/auth/verify-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -169,7 +175,13 @@ export default function Login() {
           role: 'citizen',
         }),
       })
+      const data = await response.json()
       localStorage.setItem('authToken', token)
+      localStorage.setItem('userPhone', user.phoneNumber || '')
+      localStorage.setItem('userRole', 'citizen')
+      if (data.user && data.user.epicId) {
+        localStorage.setItem('userEpicId', data.user.epicId)
+      }
       navigate('/')
     } catch (err) {
       setError('Invalid OTP. Please try again.')

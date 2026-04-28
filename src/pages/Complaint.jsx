@@ -8,10 +8,6 @@ import {
   Button,
   Grid,
   Alert,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   CircularProgress,
   Stepper,
   Step,
@@ -20,11 +16,19 @@ import {
 import WarningIcon from '@mui/icons-material/Warning'
 import SendIcon from '@mui/icons-material/Send'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api'
 import { complaintCategories, submitComplaint } from '../services/complaintService'
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 
 const steps = ['Select Category', 'Describe Issue', 'Add Location', 'Submit']
 
 function Complaint() {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  })
+
   const [activeStep, setActiveStep] = useState(0)
   const [formData, setFormData] = useState({
     category: '',
@@ -34,6 +38,8 @@ function Complaint() {
     name: '',
     phone: '',
     address: '',
+    lat: null,
+    lng: null,
   })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -41,6 +47,15 @@ function Complaint() {
 
   const handleChange = (field) => (event) => {
     setFormData({ ...formData, [field]: event.target.value })
+  }
+
+  const handleMapClick = (e) => {
+    setFormData({
+      ...formData,
+      lat: e.latLng.lat(),
+      lng: e.latLng.lng(),
+      address: `Selected on map (${e.latLng.lat().toFixed(4)}, ${e.latLng.lng().toFixed(4)})`
+    })
   }
 
   const handleNext = () => {
@@ -51,6 +66,12 @@ function Complaint() {
     if (activeStep === 1 && (!formData.title || !formData.description)) {
       setError('Please fill in all required fields')
       return
+    }
+    if (activeStep === 2) {
+      if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
+        setError('Please enter a valid 10-digit phone number')
+        return
+      }
     }
     setError(null)
     setActiveStep((prev) => prev + 1)
@@ -64,16 +85,19 @@ function Complaint() {
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      await submitComplaint({
-        ...formData,
-        category: formData.category,
-        title: formData.title,
-        description: formData.description,
-        voterId: formData.voterId || 'ANON',
-      })
+      const payload = {
+        type: formData.category,
+        description: `Title: ${formData.title}\n\nDetails: ${formData.description}\n\nContact Info:\nName: ${formData.name || 'N/A'}\nPhone: ${formData.phone || 'N/A'}\nVoter ID: ${formData.voterId || 'Not provided'}`,
+        location: {
+          address: formData.address || '',
+          coordinates: formData.lat && formData.lng ? [formData.lng, formData.lat] : []
+        }
+      }
+      await submitComplaint(payload)
       setSubmitted(true)
     } catch (err) {
-      setError('Failed to submit complaint. Please try again.')
+      console.error(err)
+      setError(err.message || 'Failed to submit complaint. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -110,6 +134,8 @@ function Complaint() {
                 name: '',
                 phone: '',
                 address: '',
+                lat: null,
+                lng: null,
               })
             }}
             sx={{ bgcolor: '#FF9933', '&:hover': { bgcolor: '#e68a2e' } }}
@@ -211,7 +237,7 @@ function Complaint() {
           {activeStep === 2 && (
             <Box>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Your Contact Information
+                Your Contact Information & Location
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
@@ -228,12 +254,31 @@ function Complaint() {
                     label="Phone Number"
                     value={formData.phone}
                     onChange={handleChange('phone')}
+                    error={formData.phone && !/^\d{10}$/.test(formData.phone)}
+                    helperText="Must be a valid 10-digit number"
                   />
                 </Grid>
                 <Grid item xs={12}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Choose Location on Map:
+                  </Typography>
+                  {isLoaded ? (
+                    <GoogleMap
+                      mapContainerStyle={{ width: '100%', height: '300px', borderRadius: '8px', marginBottom: '16px' }}
+                      center={formData.lat ? { lat: formData.lat, lng: formData.lng } : { lat: 22.5937, lng: 78.9629 }}
+                      zoom={formData.lat ? 14 : 4}
+                      onClick={handleMapClick}
+                    >
+                      {formData.lat && formData.lng && (
+                        <MarkerF position={{ lat: formData.lat, lng: formData.lng }} />
+                      )}
+                    </GoogleMap>
+                  ) : (
+                    <CircularProgress sx={{ mb: 2 }} />
+                  )}
                   <TextField
                     fullWidth
-                    label="Location / Area"
+                    label="Location / Area (Auto-filled by map or enter manually)"
                     placeholder="Where did this issue occur?"
                     value={formData.address}
                     onChange={handleChange('address')}

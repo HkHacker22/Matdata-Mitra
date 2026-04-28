@@ -1,6 +1,7 @@
 import admin from 'firebase-admin'
 import { readFileSync, existsSync } from 'fs'
 import jwt from 'jsonwebtoken'
+import User from '../models/User.js'
 
 // Initialize Firebase Admin SDK
 let firebaseInitialized = false
@@ -41,22 +42,27 @@ export const authenticate = async (req, res, next) => {
     // Try Firebase Admin verification first
     if (firebaseInitialized) {
       const decoded = await admin.auth().verifyIdToken(token)
+      // Fetch user from DB to get the correct role (since Firebase tokens lack custom claims by default)
+      const dbUser = await User.findOne({ uid: decoded.uid })
+      
       req.user = {
         uid: decoded.uid,
         email: decoded.email,
         phone: decoded.phone_number,
-        role: decoded.role || 'citizen',
+        role: dbUser ? dbUser.role : (decoded.role || 'citizen'),
       }
       return next()
     }
 
     // Fallback: JWT verification (for dev/testing without Firebase)
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const dbUserFallback = await User.findOne({ uid: decoded.uid || decoded.sub })
+    
     req.user = {
       uid: decoded.uid || decoded.sub,
       email: decoded.email,
       phone: decoded.phone,
-      role: decoded.role || 'citizen',
+      role: dbUserFallback ? dbUserFallback.role : (decoded.role || 'citizen'),
     }
     return next()
   } catch (error) {

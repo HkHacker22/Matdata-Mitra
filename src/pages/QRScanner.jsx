@@ -13,7 +13,7 @@ import {
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
 import PersonIcon from '@mui/icons-material/Person'
 import { Html5QrcodeScanner } from 'html5-qrcode'
-import { getVoterById } from '../services/voterService'
+import { getVoterById, verifyVoter } from '../services/voterService'
 
 function QRScanner() {
   const [scanning, setScanning] = useState(false)
@@ -21,6 +21,8 @@ function QRScanner() {
   const [voterData, setVoterData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [verifySuccess, setVerifySuccess] = useState(false)
   const scannerRef = useRef(null)
 
   useEffect(() => {
@@ -52,7 +54,9 @@ function QRScanner() {
 
         scanner.render(
           async (decodedText) => {
-            scanner.pause()
+            if (scannerRef.current) {
+              scannerRef.current.clear()
+            }
             setScanResult(decodedText)
             await processQRData(decodedText)
           },
@@ -101,6 +105,22 @@ function QRScanner() {
     setScanResult(null)
     setVoterData(null)
     setError(null)
+    setVerifySuccess(false)
+  }
+
+  const handleVerify = async () => {
+    if (!voterData) return
+    setVerifying(true)
+    setError(null)
+    try {
+      await verifyVoter(voterData._id)
+      setVerifySuccess(true)
+      setVoterData(prev => ({ ...prev, verified: true }))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setVerifying(false)
+    }
   }
 
   return (
@@ -166,9 +186,15 @@ function QRScanner() {
 
           {scanResult && voterData && (
             <Box>
-              <Alert severity="success" sx={{ mb: 2 }}>
-                ✅ Voter verified successfully!
-              </Alert>
+              {verifySuccess ? (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  ✅ Voter successfully verified and logged in system!
+                </Alert>
+              ) : (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Voter found. Please check details before confirming.
+                </Alert>
+              )}
               <Card sx={{ bgcolor: '#E8F5E9', border: '2px solid #4CAF50' }}>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
@@ -211,10 +237,25 @@ function QRScanner() {
                   </Typography>
                 </CardContent>
               </Card>
+              {!verifySuccess && !voterData.verified && (
+                <Button
+                  variant="contained"
+                  onClick={handleVerify}
+                  disabled={verifying}
+                  sx={{ mt: 2, mr: 2, bgcolor: '#4CAF50', '&:hover': { bgcolor: '#388E3C' } }}
+                >
+                  {verifying ? <CircularProgress size={24} color="inherit" /> : 'Confirm Verification'}
+                </Button>
+              )}
+              {voterData.verified && !verifySuccess && (
+                <Alert severity="warning" sx={{ mt: 2, mb: 2 }}>
+                  ⚠️ This voter is already marked as verified in the system.
+                </Alert>
+              )}
               <Button
-                variant="contained"
+                variant={!verifySuccess && !voterData.verified ? "outlined" : "contained"}
                 onClick={resetScanner}
-                sx={{ mt: 2, bgcolor: '#000080' }}
+                sx={{ mt: 2, bgcolor: !verifySuccess && !voterData.verified ? 'transparent' : '#000080', color: !verifySuccess && !voterData.verified ? '#000080' : 'white' }}
               >
                 Scan Another
               </Button>

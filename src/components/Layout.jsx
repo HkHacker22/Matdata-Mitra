@@ -14,6 +14,18 @@ import {
   Button,
   useMediaQuery,
   useTheme,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  TextField,
+  CircularProgress,
+  Alert,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
@@ -28,6 +40,8 @@ import InstagramIcon from '@mui/icons-material/Instagram'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
 import BadgeIcon from '@mui/icons-material/Badge'
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
+import UploadFileIcon from '@mui/icons-material/UploadFile'
+import PersonIcon from '@mui/icons-material/Person'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const citizenNavItems = [
@@ -50,12 +64,25 @@ function Header({ onMenuClick }) {
   const isLoggedIn = !!localStorage.getItem('authToken')
   const userRole = localStorage.getItem('userRole') || 'citizen'
 
+  const [anchorEl, setAnchorEl] = useState(null)
+  const handleProfileClick = (event) => setAnchorEl(event.currentTarget)
+  const handleProfileClose = () => setAnchorEl(null)
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      alert(`Simulating document upload for: ${file.name}`)
+      // Add real upload logic here later
+    }
+    handleProfileClose()
+  }
+
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
-        bgcolor: 'rgba(255, 255, 255, 0.75)',
+        bgcolor: 'rgba(240, 248, 255, 0.85)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         color: '#1f2937',
@@ -166,14 +193,75 @@ function Header({ onMenuClick }) {
             </Button>
           )}
           {isLoggedIn && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                localStorage.removeItem('authToken')
-                localStorage.removeItem('userRole')
-                navigate('/login')
-              }}
+            <>
+              <IconButton 
+                onClick={handleProfileClick} 
+                size="small"
+                sx={{ 
+                  bgcolor: 'rgba(59, 130, 246, 0.1)', 
+                  transition: 'all 0.2s',
+                  '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.2)', transform: 'translateY(-2px)' } 
+                }}
+              >
+                <PersonIcon sx={{ color: '#3b82f6' }} />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleProfileClose}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                PaperProps={{
+                  sx: { mt: 1.5, minWidth: 240, borderRadius: 3, boxShadow: '0 10px 40px rgba(0,0,0,0.1)', border: '1px solid rgba(229,231,235,0.5)' }
+                }}
+              >
+                <Box sx={{ px: 2, py: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1f2937' }}>
+                    User Profile
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#3b82f6', fontWeight: 600, mb: 0.5, wordBreak: 'break-all' }}>
+                    {localStorage.getItem('userEmail') || localStorage.getItem('userPhone') || 'user@example.com'}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500, bgcolor: '#f1f5f9', px: 1, py: 0.25, borderRadius: 1 }}>
+                    Role: {userRole.toUpperCase()}
+                  </Typography>
+                </Box>
+                <Divider sx={{ mb: 1, mx: 2 }} />
+                {userRole === 'citizen' && localStorage.getItem('userEpicId') && (
+                  <MenuItem 
+                    component={Link} 
+                    to={`/qr-generator?voterId=${localStorage.getItem('userEpicId')}`}
+                    onClick={handleProfileClose}
+                    sx={{ py: 1.5, px: 2, mx: 1, borderRadius: 2, mb: 1, '&:hover': { bgcolor: 'rgba(22, 163, 74, 0.05)' } }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <QrCodeScannerIcon fontSize="small" sx={{ color: '#16a34a' }} />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Generate My QR" 
+                      secondary="Digital Voter Slip" 
+                      primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }} 
+                      secondaryTypographyProps={{ fontSize: '0.75rem' }} 
+                    />
+                  </MenuItem>
+                )}
+                <MenuItem component="label" sx={{ py: 1.5, px: 2, mx: 1, borderRadius: 2, mb: 1, '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.05)' } }}>
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    <UploadFileIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                  </ListItemIcon>
+                  <ListItemText primary="Upload Document" secondary="PDF format only" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 600, color: '#1f2937' }} secondaryTypographyProps={{ fontSize: '0.75rem' }} />
+                  <input type="file" hidden accept="application/pdf" onChange={handleFileUpload} />
+                </MenuItem>
+              </Menu>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  localStorage.removeItem('authToken')
+                  localStorage.removeItem('userRole')
+                  localStorage.removeItem('userEpicId')
+                  navigate('/login')
+                }}
               sx={{
                 textTransform: 'none',
                 fontWeight: 600,
@@ -193,6 +281,7 @@ function Header({ onMenuClick }) {
             >
               Logout
             </Button>
+            </>
           )}
         </Box>
       </Toolbar>
@@ -200,13 +289,27 @@ function Header({ onMenuClick }) {
   )
 }
 
+const footerLinks = [
+  { label: 'About ECI', url: 'https://www.eci.gov.in/about-eci' },
+  { label: 'Contact Us', url: 'https://www.eci.gov.in/contact-us' },
+  { label: 'Privacy Policy', url: 'https://www.eci.gov.in/privacy-policy' },
+  { label: 'Terms of Use', url: 'https://www.eci.gov.in/terms-conditions' }
+];
+
+const socialLinks = [
+  { icon: FacebookIcon, url: 'https://www.facebook.com/ECI/' },
+  { icon: TwitterIcon, url: 'https://twitter.com/ECISVEEP' },
+  { icon: InstagramIcon, url: 'https://www.instagram.com/ecisveep/' },
+  { icon: LinkedInIcon, url: 'https://www.linkedin.com/company/election-commission-of-india' }
+];
+
 function Footer() {
   return (
     <Box
       component="footer"
       sx={{
-        bgcolor: '#ffffff',
-        borderTop: '1px solid rgba(229, 231, 235, 0.5)',
+        bgcolor: '#f0f8ff', // subtle blue tint
+        borderTop: '1px solid rgba(59, 130, 246, 0.15)', // subtle blue border
         py: 4,
         px: 2,
         mt: 'auto',
@@ -224,40 +327,57 @@ function Footer() {
         }}
       >
         <Box sx={{ display: 'flex', gap: { xs: 2, sm: 4 }, flexWrap: 'wrap', justifyContent: 'center' }}>
-          {['About ECI', 'Contact Us', 'Privacy Policy', 'Terms of Use'].map((item) => (
+          {footerLinks.map((item) => (
             <Typography
-              key={item}
+              key={item.label}
+              component="a"
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
               variant="body2"
               sx={{ 
-                color: '#4b5563', 
-                fontWeight: 500,
+                color: '#475569', 
+                fontWeight: 600,
                 cursor: 'pointer', 
+                textDecoration: 'none',
                 transition: 'color 0.2s',
-                '&:hover': { color: '#16a34a' } 
+                '&:hover': { color: '#2563eb' } 
               }}
             >
-              {item}
+              {item.label}
             </Typography>
           ))}
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5 }}>
-          {[FacebookIcon, TwitterIcon, InstagramIcon, LinkedInIcon].map((Icon, i) => (
-            <IconButton 
-              key={i} 
-              size="small" 
-              sx={{ 
-                color: '#9ca3af', 
-                bgcolor: '#f3f4f6',
-                transition: 'all 0.2s',
-                '&:hover': { color: '#ffffff', bgcolor: '#16a34a', transform: 'translateY(-2px)' } 
-              }}
-            >
-              <Icon fontSize="small" />
-            </IconButton>
-          ))}
+          {socialLinks.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <IconButton 
+                key={i} 
+                component="a"
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="small" 
+                sx={{ 
+                  color: '#3b82f6', 
+                  bgcolor: 'rgba(59, 130, 246, 0.1)',
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    color: '#ffffff', 
+                    bgcolor: '#2563eb', 
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
+                  } 
+                }}
+              >
+                <Icon fontSize="small" />
+              </IconButton>
+            );
+          })}
         </Box>
       </Box>
-      <Typography variant="body2" sx={{ textAlign: 'center', mt: 4, color: '#9ca3af', fontSize: '0.85rem' }}>
+      <Typography variant="body2" sx={{ textAlign: 'center', mt: 4, color: '#64748b', fontSize: '0.85rem' }}>
         © {new Date().getFullYear()} Matdata Mitra - Election Commission of India.
       </Typography>
     </Box>
@@ -277,6 +397,70 @@ function Layout() {
   
   const userRole = localStorage.getItem('userRole') || 'citizen'
   const isHome = location.pathname === '/'
+
+  // EPIC ID Logic
+  const [epicIdModalOpen, setEpicIdModalOpen] = useState(false)
+  const [epicIdInput, setEpicIdInput] = useState('')
+  const [epicError, setEpicError] = useState('')
+  const [epicLoading, setEpicLoading] = useState(false)
+  const [userEpicId, setUserEpicId] = useState(localStorage.getItem('userEpicId') || null)
+
+  React.useEffect(() => {
+    const checkProfile = async () => {
+      const token = localStorage.getItem('authToken')
+      const role = localStorage.getItem('userRole')
+      if (token && role === 'citizen' && !userEpicId) {
+        try {
+          const res = await fetch('/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          if (res.ok) {
+            const data = await res.json()
+            if (data.epicId) {
+              setUserEpicId(data.epicId)
+              localStorage.setItem('userEpicId', data.epicId)
+            } else {
+              setEpicIdModalOpen(true)
+            }
+          }
+        } catch (e) {
+          console.error(e)
+        }
+      }
+    }
+    checkProfile()
+  }, [userEpicId, location.pathname])
+
+  const handleEpicSubmit = async () => {
+    if (!epicIdInput.trim()) {
+      setEpicError('EPIC ID is required')
+      return
+    }
+    setEpicLoading(true)
+    setEpicError('')
+    try {
+      const token = localStorage.getItem('authToken')
+      const res = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ epicId: epicIdInput.trim() })
+      })
+      
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to link EPIC ID')
+      
+      setUserEpicId(data.epicId)
+      localStorage.setItem('userEpicId', data.epicId)
+      setEpicIdModalOpen(false)
+    } catch (err) {
+      setEpicError(err.message)
+    } finally {
+      setEpicLoading(false)
+    }
+  }
 
   const drawer = (
     <Box sx={{ width: 280, pt: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -366,6 +550,43 @@ function Layout() {
         </Box>
       </Box>
       <Footer />
+
+      {/* Global EPIC ID Lock Modal */}
+      <Dialog open={epicIdModalOpen} disableEscapeKeyDown>
+        <DialogTitle sx={{ color: '#d32f2f', fontWeight: 700 }}>Action Required: Link EPIC ID</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            To access citizen services, file complaints, or generate your QR slip, you must securely link your Voter ID (EPIC ID).
+          </DialogContentText>
+          {epicError && <Alert severity="error" sx={{ mb: 2 }}>{epicError}</Alert>}
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Enter EPIC ID"
+            fullWidth
+            variant="outlined"
+            value={epicIdInput}
+            onChange={(e) => setEpicIdInput(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={() => {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('userRole');
+              localStorage.removeItem('userEpicId');
+              setEpicIdModalOpen(false);
+              navigate('/login');
+            }} 
+            color="inherit"
+          >
+            Logout
+          </Button>
+          <Button onClick={handleEpicSubmit} variant="contained" disabled={epicLoading} sx={{ bgcolor: '#16a34a' }}>
+            {epicLoading ? <CircularProgress size={24} color="inherit" /> : 'Link Voter ID'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

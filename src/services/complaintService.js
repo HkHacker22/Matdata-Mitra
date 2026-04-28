@@ -1,55 +1,43 @@
 export const complaintCategories = [
-  { id: 'voting', label: 'Voting Issues', icon: '🗳️' },
-  { id: 'booth', label: 'Booth Problems', icon: '🏢' },
-  { id: 'documents', label: 'Document Issues', icon: '📄' },
-  { id: ' staff', label: 'Staff Behavior', icon: '👤' },
-  { id: 'technical', label: 'Technical Issues', icon: '⚙️' },
+  { id: 'evm_malfunction', label: 'EVM Malfunction', icon: '⚙️' },
+  { id: 'booth_issue', label: 'Booth Problems', icon: '🏢' },
+  { id: 'accessibility', label: 'Accessibility Issues', icon: '♿' },
+  { id: 'voter_intimidation', label: 'Voter Intimidation', icon: '👤' },
   { id: 'other', label: 'Other', icon: '❓' },
 ]
 
-export const mockComplaints = [
-  {
-    id: 'C001',
-    category: 'booth',
-    title: 'Water facility not available',
-    description: 'The polling booth does not have drinking water facility.',
-    location: 'Sector-15, Rohini',
-    status: 'pending',
-    createdAt: '2024-01-15T10:30:00Z',
-    voterId: 'V001',
-  },
-  {
-    id: 'C002',
-    category: 'staff',
-    title: 'Rude behavior by polling officer',
-    description: 'The polling officer was rude and did not help elderly voters.',
-    location: 'Sector-16, Rohini',
-    status: 'resolved',
-    createdAt: '2024-01-14T14:20:00Z',
-    voterId: 'V003',
-  },
-]
+// Helper for authenticated requests
+const authFetch = async (url, options = {}) => {
+  const token = localStorage.getItem('authToken')
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...options.headers,
+  }
+
+  const response = await fetch(url, { ...options, headers })
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.error || 'API request failed')
+  }
+  return response.json()
+}
 
 export const submitComplaint = async (complaintData) => {
-  await new Promise((resolve) => setTimeout(resolve, 800))
-  
-  const newComplaint = {
-    id: `C${String(mockComplaints.length + 1).padStart(3, '0')}`,
-    ...complaintData,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  }
-  
-  mockComplaints.push(newComplaint)
-  return newComplaint
+  return await authFetch('/api/complaints', {
+    method: 'POST',
+    body: JSON.stringify(complaintData),
+  })
 }
 
-export const getComplaintStatus = async (complaintId) => {
-  await new Promise((resolve) => setTimeout(resolve, 400))
-  return mockComplaints.find((c) => c.id === complaintId) || null
+export const getComplaints = async (status = '') => {
+  const query = status ? `?status=${status}` : ''
+  return await authFetch(`/api/complaints${query}`)
 }
 
-export const getUserComplaints = async (voterId) => {
-  await new Promise((resolve) => setTimeout(resolve, 400))
-  return mockComplaints.filter((c) => c.voterId === voterId)
+export const updateComplaintStatus = async (id, status, resolution = '') => {
+  return await authFetch(`/api/complaints/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, resolution }),
+  })
 }

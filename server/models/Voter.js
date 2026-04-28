@@ -46,11 +46,36 @@ const voterSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
+  verifiedAt: {
+    type: Date,
+    default: null,
+  },
+  verifiedBy: {
+    type: String,
+    default: null,
+  },
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      default: [0, 0],
+    },
+  },
 }, {
   timestamps: true,
 })
 
 // Text index for search
 voterSchema.index({ name: 'text', voterId: 'text', address: 'text' })
+// Geospatial index
+voterSchema.index({ location: '2dsphere' })
 
 export default mongoose.model('Voter', voterSchema)

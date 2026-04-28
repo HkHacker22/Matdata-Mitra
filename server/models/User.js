@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  epicId: {
+    type: String,
+    default: null,
+  },
   lastLogin: {
     type: Date,
     default: Date.now,

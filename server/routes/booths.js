@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import Booth from '../models/Booth.js'
+import Voter from '../models/Voter.js'
 
 const router = Router()
 
@@ -78,6 +79,40 @@ router.get('/nearest', async (req, res) => {
   } catch (error) {
     console.error('Nearest booth error:', error)
     res.status(500).json({ error: 'Failed to find nearest booths' })
+  }
+})
+
+/**
+ * GET /api/booths/map-data
+ * Get all booths with verification stats for map plotting
+ */
+router.get('/map-data', async (req, res) => {
+  try {
+    const stats = await Voter.aggregate([
+      {
+        $group: {
+          _id: "$pollingStation",
+          totalVoters: { $sum: 1 },
+          verifiedVoters: { $sum: { $cond: ["$verified", 1, 0] } }
+        }
+      }
+    ])
+
+    const booths = await Booth.find({ isActive: true }).lean()
+    
+    const mapData = booths.map(booth => {
+      const stat = stats.find(s => s._id === booth.name) || { totalVoters: 0, verifiedVoters: 0 }
+      return {
+        ...booth,
+        totalVoters: stat.totalVoters,
+        verifiedVoters: stat.verifiedVoters
+      }
+    })
+
+    res.json(mapData)
+  } catch (error) {
+    console.error('Map data fetch error:', error)
+    res.status(500).json({ error: 'Failed to fetch map data' })
   }
 })
 

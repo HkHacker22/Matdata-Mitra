@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import Voter from '../models/Voter.js'
 import { authenticate } from '../middleware/auth.js'
 
 const router = Router()
@@ -73,11 +74,50 @@ router.post('/verify-token', async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        epicId: user.epicId,
       },
     })
   } catch (error) {
     console.error('Auth error:', error)
     res.status(500).json({ error: 'Authentication failed' })
+  }
+})
+
+/**
+ * PATCH /api/auth/profile
+ * Link EPIC ID to the user profile
+ */
+router.patch('/profile', authenticate, async (req, res) => {
+  try {
+    const { epicId } = req.body
+    const user = await User.findOne({ uid: req.user.uid })
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    if (epicId) {
+      // Verify epicId exists in Voter database
+      const voter = await Voter.findOne({ voterId: epicId })
+      if (!voter) {
+        return res.status(400).json({ error: 'Invalid EPIC ID. Voter not found in electoral rolls.' })
+      }
+      user.epicId = epicId
+    }
+
+    await user.save()
+
+    res.json({
+      uid: user.uid,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      epicId: user.epicId,
+    })
+  } catch (error) {
+    console.error('Profile update error:', error)
+    res.status(500).json({ error: 'Failed to update profile' })
   }
 })
 

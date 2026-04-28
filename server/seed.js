@@ -83,44 +83,74 @@ const booths = [
     bloPhone: '+91-9876543210',
   },
   {
-    name: 'Community Center',
-    address: 'Sector-16, Rohini, Delhi',
-    constituency: 'Delhi-42',
-    partNo: '125',
-    location: { type: 'Point', coordinates: [77.0523, 28.7289] },
-    facilities: { drinkingWater: true, electricity: true },
-    bloName: 'Suresh Kumar',
+    name: 'Mumbai Central Community Hall',
+    address: 'Dadar West, Mumbai, Maharashtra',
+    constituency: 'Mumbai South Central',
+    partNo: '45',
+    location: { type: 'Point', coordinates: [72.8426, 19.0176] },
+    facilities: { ramp: true, drinkingWater: true, electricity: true, toilet: true },
+    bloName: 'Prakash Patil',
     bloPhone: '+91-9876543211',
   },
   {
-    name: 'Municipal Primary School',
-    address: 'Sector-17, Rohini, Delhi',
-    constituency: 'Delhi-43',
-    partNo: '101',
-    location: { type: 'Point', coordinates: [77.0612, 28.7356] },
-    facilities: { ramp: true, drinkingWater: true, shade: true, electricity: true, toilet: true },
-    bloName: 'Anita Singh',
+    name: 'Bengaluru Public School',
+    address: 'Koramangala, Bengaluru, Karnataka',
+    constituency: 'Bengaluru South',
+    partNo: '89',
+    location: { type: 'Point', coordinates: [77.6271, 12.9352] },
+    facilities: { ramp: false, drinkingWater: true, shade: true, electricity: true },
+    bloName: 'Krishna Reddy',
     bloPhone: '+91-9876543212',
   },
   {
-    name: 'NGO Office Complex',
-    address: 'Sector-18, Rohini, Delhi',
-    constituency: 'Delhi-43',
-    partNo: '102',
-    location: { type: 'Point', coordinates: [77.0654, 28.7401] },
-    facilities: { drinkingWater: true, electricity: true },
-    bloName: 'Manoj Tiwari',
+    name: 'Chennai Corporation School',
+    address: 'T. Nagar, Chennai, Tamil Nadu',
+    constituency: 'Chennai South',
+    partNo: '12',
+    location: { type: 'Point', coordinates: [80.2338, 13.0405] },
+    facilities: { ramp: true, drinkingWater: true, electricity: true, toilet: true },
+    bloName: 'Lakshmi N',
     bloPhone: '+91-9876543213',
   },
   {
-    name: 'Religious Hall',
-    address: 'Sector-19, Rohini, Delhi',
-    constituency: 'Delhi-44',
-    partNo: '130',
-    location: { type: 'Point', coordinates: [77.0701, 28.7456] },
-    facilities: { drinkingWater: true, shade: true, electricity: true },
-    bloName: 'Fatima Khan',
+    name: 'Kolkata Municipal College',
+    address: 'Park Street, Kolkata, West Bengal',
+    constituency: 'Kolkata Dakshin',
+    partNo: '67',
+    location: { type: 'Point', coordinates: [88.3524, 22.5518] },
+    facilities: { ramp: true, drinkingWater: true, shade: false, electricity: true },
+    bloName: 'Subhasish Banerjee',
     bloPhone: '+91-9876543214',
+  },
+  {
+    name: 'Lucknow Vidya Mandir',
+    address: 'Gomti Nagar, Lucknow, UP',
+    constituency: 'Lucknow East',
+    partNo: '34',
+    location: { type: 'Point', coordinates: [80.9462, 26.8467] },
+    facilities: { ramp: true, drinkingWater: true, shade: true, electricity: true },
+    bloName: 'Ravi Prakash',
+    bloPhone: '+91-9876543215',
+  },
+  {
+    name: 'Ahmedabad Heritage School',
+    address: 'Navrangpura, Ahmedabad, Gujarat',
+    constituency: 'Ahmedabad West',
+    partNo: '56',
+    location: { type: 'Point', coordinates: [72.5714, 23.0225] },
+    facilities: { ramp: false, drinkingWater: true, shade: true, electricity: true },
+    bloName: 'Amit Shah',
+    bloPhone: '+91-9876543216',
+  },
+  {
+    name: 'Jaipur Royal College',
+    address: 'Malviya Nagar, Jaipur, Rajasthan',
+    constituency: 'Jaipur City',
+    partNo: '90',
+    location: { type: 'Point', coordinates: [75.7873, 26.9124] },
+    facilities: { ramp: true, drinkingWater: true, shade: true, electricity: true },
+    bloName: 'Vikram Rathore',
+    bloPhone: '+91-9876543217',
   },
 ]
 
@@ -167,22 +197,19 @@ const seed = async () => {
     Voter.deleteMany({}),
     Booth.deleteMany({}),
     Notification.deleteMany({}),
-    User.deleteMany({}),
   ])
   console.log('  🗑️  Cleared existing data')
 
   // Insert seed data
-  const [insertedVoters, insertedBooths, insertedNotifications, insertedUser] = await Promise.all([
+  const [insertedVoters, insertedBooths, insertedNotifications] = await Promise.all([
     Voter.insertMany(voters),
     Booth.insertMany(booths),
     Notification.insertMany(notifications),
-    User.create(demoUser),
   ])
 
   console.log(`  ✅ ${insertedVoters.length} voters`)
   console.log(`  ✅ ${insertedBooths.length} booths`)
   console.log(`  ✅ ${insertedNotifications.length} notifications`)
-  console.log(`  ✅ 1 admin user (${demoUser.email})`)
 
   console.log('\n🎉 Seeding complete!')
 

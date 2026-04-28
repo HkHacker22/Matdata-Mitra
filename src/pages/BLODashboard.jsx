@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Box,
@@ -21,6 +21,12 @@ import {
   Alert,
   LinearProgress,
   Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
@@ -29,39 +35,82 @@ import PeopleIcon from '@mui/icons-material/People'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import WarningIcon from '@mui/icons-material/Warning'
 import RefreshIcon from '@mui/icons-material/Refresh'
-
-const bloStats = {
-  totalVoters: 1250,
-  verified: 980,
-  pending: 270,
-  complaints: 12,
-}
-
-const boothAssignments = [
-  { id: 'B001', name: 'Govt. Senior Secondary School', voters: 450, verified: 380, pending: 70 },
-  { id: 'B002', name: 'Community Center', voters: 320, verified: 290, pending: 30 },
-  { id: 'B003', name: 'Municipal Primary School', voters: 480, verified: 310, pending: 170 },
-]
-
-const recentVerifications = [
-  { id: 'V001', name: 'Rajesh Kumar', booth: 'B001', time: '10:30 AM', status: 'verified' },
-  { id: 'V002', name: 'Priya Sharma', booth: 'B001', time: '10:25 AM', status: 'verified' },
-  { id: 'V003', name: 'Amit Patel', booth: 'B002', time: '10:20 AM', status: 'pending' },
-  { id: 'V004', name: 'Sunita Devi', booth: 'B003', time: '10:15 AM', status: 'verified' },
-  { id: 'V005', name: 'Mohammad Rafiq', booth: 'B003', time: '10:10 AM', status: 'pending' },
-]
-
-const pendingComplaints = [
-  { id: 'C001', title: 'Water facility not available', booth: 'B001', priority: 'high', time: '2 hours ago' },
-  { id: 'C002', title: 'Missing voter list', booth: 'B003', priority: 'medium', time: '4 hours ago' },
-]
+import { getComplaints, updateComplaintStatus } from '../services/complaintService'
+import { getVoterStats, getRecentVerifications } from '../services/voterService'
 
 function BLODashboard() {
   const [currentTab, setCurrentTab] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
 
+  const [complaints, setComplaints] = useState([])
+  const [complaintFilter, setComplaintFilter] = useState('pending')
+  const [selectedComplaint, setSelectedComplaint] = useState(null)
+
+  const [stats, setStats] = useState({ totalAssigned: 0, verified: 0, pending: 0, verifiedByMe: 0 })
+  const [verifications, setVerifications] = useState([])
+  const [boothAssignments, setBoothAssignments] = useState([])
+
+  const loadDashboardData = async () => {
+    fetchComplaints()
+    try {
+      const [statsData, verificationsData, mapDataRes] = await Promise.all([
+        getVoterStats(),
+        getRecentVerifications(),
+        fetch('/api/booths/map-data')
+      ])
+      setStats(statsData)
+      setVerifications(verificationsData)
+      
+      const mapData = await mapDataRes.json()
+      // Use map data to dynamically populate booth assignments
+      const mappedBooths = mapData.map(b => ({
+        id: b._id.substring(b._id.length - 4).toUpperCase(),
+        name: b.name,
+        voters: b.totalVoters,
+        verified: b.verifiedVoters,
+        pending: b.totalVoters - b.verifiedVoters
+      }))
+      setBoothAssignments(mappedBooths)
+      setVerifications(verificationsData)
+    } catch (err) {
+      console.error('Failed to load dashboard data', err)
+    }
+  }
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  const fetchComplaints = async () => {
+    try {
+      const data = await getComplaints()
+      setComplaints(data.complaints || [])
+    } catch (err) {
+      console.error('Failed to fetch complaints', err)
+    }
+  }
+
+  const handleResolve = async (id) => {
+    try {
+      await updateComplaintStatus(id, 'resolved', 'Resolved by BLO')
+      setSelectedComplaint(null)
+      fetchComplaints()
+    } catch (err) {
+      console.error('Failed to resolve', err)
+    }
+  }
+
+  const pendingList = complaints.filter(c => c.status === 'pending' || c.status === 'in_progress')
+  const resolvedList = complaints.filter(c => c.status === 'resolved')
+
+  const bloStatsDynamic = {
+    ...stats,
+    complaints: pendingList.length,
+  }
+
   const getVerifiedPercentage = () => {
-    return Math.round((bloStats.verified / bloStats.totalVoters) * 100)
+    if (stats.totalAssigned === 0) return 0
+    return Math.round((stats.verified / stats.totalAssigned) * 100)
   }
 
   const renderOverview = () => (
@@ -73,7 +122,7 @@ function BLODashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" color="text.secondary">Total Voters</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{bloStats.totalVoters}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{stats.totalAssigned}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: '#000080' }}><PeopleIcon /></Avatar>
               </Box>
@@ -87,7 +136,7 @@ function BLODashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" color="text.secondary">Verified</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{bloStats.verified}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{stats.verified}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: '#4CAF50' }}><CheckCircleIcon /></Avatar>
               </Box>
@@ -101,7 +150,7 @@ function BLODashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" color="text.secondary">Pending</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{bloStats.pending}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{stats.pending}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: '#FF9933' }}><WarningIcon /></Avatar>
               </Box>
@@ -115,7 +164,7 @@ function BLODashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="body2" color="text.secondary">Complaints</Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{bloStats.complaints}</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>{bloStatsDynamic.complaints}</Typography>
                 </Box>
                 <Avatar sx={{ bgcolor: '#D32F2F' }}><HowToVoteIcon /></Avatar>
               </Box>
@@ -144,7 +193,7 @@ function BLODashboard() {
             />
           </Box>
           <Typography variant="body2" color="text.secondary">
-            {bloStats.verified} of {bloStats.totalVoters} voters verified
+            {stats.verified} of {stats.totalAssigned} voters verified
           </Typography>
         </CardContent>
       </Card>
@@ -192,32 +241,39 @@ function BLODashboard() {
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>Pending Complaints</Typography>
-              {pendingComplaints.map((complaint) => (
+              {pendingList.slice(0, 5).map((complaint) => (
                 <Box
-                  key={complaint.id}
+                  key={complaint._id}
+                  onClick={() => setSelectedComplaint(complaint)}
                   sx={{
                     p: 2,
                     mb: 1,
-                    bgcolor: complaint.priority === 'high' ? '#FFEBEE' : '#FFF3E0',
+                    bgcolor: '#FFF3E0',
                     borderRadius: 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    '&:hover': { bgcolor: '#FFE0B2', transform: 'translateY(-2px)' }
                   }}
                 >
                   <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{complaint.title}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>{complaint.type.toUpperCase()}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {complaint.booth} • {complaint.time}
+                      {new Date(complaint.createdAt).toLocaleDateString()}
                     </Typography>
                   </Box>
                   <Chip
-                    label={complaint.priority}
+                    label="Pending"
                     size="small"
-                    color={complaint.priority === 'high' ? 'error' : 'warning'}
+                    color="warning"
                   />
                 </Box>
               ))}
+              {pendingList.length === 0 && (
+                <Typography variant="body2" color="text.secondary">No pending complaints.</Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -272,17 +328,17 @@ function BLODashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {recentVerifications.map((voter) => (
-                  <TableRow key={voter.id}>
-                    <TableCell>{voter.id}</TableCell>
+                {verifications.map((voter) => (
+                  <TableRow key={voter._id}>
+                    <TableCell>{voter.voterId}</TableCell>
                     <TableCell>{voter.name}</TableCell>
-                    <TableCell>{voter.booth}</TableCell>
-                    <TableCell>{voter.time}</TableCell>
+                    <TableCell>{voter.pollingStation}</TableCell>
+                    <TableCell>{new Date(voter.verifiedAt).toLocaleTimeString()}</TableCell>
                     <TableCell>
                       <Chip
-                        label={voter.status}
+                        label="verified"
                         size="small"
-                        color={voter.status === 'verified' ? 'success' : 'warning'}
+                        color="success"
                       />
                     </TableCell>
                     <TableCell>
@@ -292,6 +348,11 @@ function BLODashboard() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {verifications.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">No recent verifications</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -309,6 +370,7 @@ function BLODashboard() {
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
+          onClick={loadDashboardData}
           sx={{ borderColor: '#000080', color: '#000080' }}
         >
           Refresh
@@ -326,6 +388,7 @@ function BLODashboard() {
           <Tab label="Overview" />
           <Tab label="Verifications" />
           <Tab label="My Booths" />
+          <Tab label="Complaints" />
         </Tabs>
       </Box>
 
@@ -352,6 +415,113 @@ function BLODashboard() {
           ))}
         </Box>
       )}
+      {currentTab === 3 && (
+        <Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+            <Typography variant="h6">Complaints Management</Typography>
+            <ToggleButtonGroup
+              color="primary"
+              value={complaintFilter}
+              exclusive
+              onChange={(e, val) => val && setComplaintFilter(val)}
+              size="small"
+              sx={{ bgcolor: '#fff' }}
+            >
+              <ToggleButton value="pending" sx={{ px: 3, fontWeight: 600 }}>Pending ({pendingList.length})</ToggleButton>
+              <ToggleButton value="resolved" sx={{ px: 3, fontWeight: 600 }}>Resolved ({resolvedList.length})</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          
+          <Grid container spacing={2}>
+            {(complaintFilter === 'pending' ? pendingList : resolvedList).map((c) => (
+              <Grid item xs={12} sm={6} md={4} key={c._id}>
+                <Card 
+                  onClick={() => setSelectedComplaint(c)}
+                  sx={{ cursor: 'pointer', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 4 } }}
+                >
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, alignItems: 'flex-start' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1a237e' }}>
+                        {c.type.toUpperCase().replace('_', ' ')}
+                      </Typography>
+                      <Chip 
+                        label={c.status.toUpperCase()} 
+                        size="small" 
+                        color={c.status === 'resolved' ? 'success' : 'warning'} 
+                        sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                      />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 40 }}>
+                      {c.description}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748b', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+                      <span>{c.location?.address || 'No Location'}</span>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+          {(complaintFilter === 'pending' ? pendingList : resolvedList).length === 0 && (
+            <Alert severity="info" sx={{ mt: 2 }}>No complaints found.</Alert>
+          )}
+        </Box>
+      )}
+
+      {/* Complaint Dialog */}
+      <Dialog open={!!selectedComplaint} onClose={() => setSelectedComplaint(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        {selectedComplaint && (
+          <>
+            <DialogTitle sx={{ fontWeight: 800, color: '#1a237e', pb: 1 }}>Complaint Details</DialogTitle>
+            <DialogContent dividers sx={{ pt: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Type</Typography>
+                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>{selectedComplaint.type.toUpperCase().replace('_', ' ')}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Date</Typography>
+                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>{new Date(selectedComplaint.createdAt).toLocaleString()}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Description</Typography>
+                  <Typography variant="body1" sx={{ mb: 2, whiteSpace: 'pre-wrap', bgcolor: '#f8fafc', p: 2, borderRadius: 2, border: '1px solid #e2e8f0' }}>
+                    {selectedComplaint.description}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Location</Typography>
+                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>{selectedComplaint.location?.address || 'Not provided'}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Status</Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Chip 
+                      label={selectedComplaint.status.toUpperCase()} 
+                      color={selectedComplaint.status === 'resolved' ? 'success' : 'warning'} 
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+            </DialogContent>
+            <DialogActions sx={{ p: 2.5, bgcolor: '#f8fafc' }}>
+              <Button onClick={() => setSelectedComplaint(null)} sx={{ color: '#64748b', fontWeight: 600 }}>Close</Button>
+              {selectedComplaint.status !== 'resolved' && (
+                <Button 
+                  variant="contained" 
+                  color="success" 
+                  onClick={() => handleResolve(selectedComplaint._id)}
+                  sx={{ borderRadius: 2, fontWeight: 600, px: 3, boxShadow: '0 4px 14px 0 rgba(76, 175, 80, 0.39)' }}
+                >
+                  Mark as Resolved
+                </Button>
+              )}
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Box>
   )
 }
