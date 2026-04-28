@@ -82,7 +82,7 @@ export default function BLOLogin() {
       await signInWithEmailAndPassword(auth, bloId, password)
       const user = auth.currentUser
       const token = await user.getIdToken()
-      await fetch('/api/auth/verify-token', {
+      const response = await fetch('/api/auth/verify-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,6 +92,11 @@ export default function BLOLogin() {
           role: 'blo',
         }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'BLO authorization failed')
+      }
       localStorage.setItem('authToken', token)
       localStorage.setItem('userRole', 'blo')
       navigate('/blo-dashboard')

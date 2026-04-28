@@ -119,6 +119,12 @@ export default function Login() {
           role: 'citizen',
         }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Backend synchronization failed')
+      }
+
       const data = await response.json()
       localStorage.setItem('authToken', token)
       localStorage.setItem('userEmail', user.email || '')
@@ -175,6 +181,12 @@ export default function Login() {
           role: 'citizen',
         }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'OTP verification failed')
+      }
+
       const data = await response.json()
       localStorage.setItem('authToken', token)
       localStorage.setItem('userPhone', user.phoneNumber || '')

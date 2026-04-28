@@ -44,6 +44,7 @@ function BoothLocator() {
   const [booths, setBooths] = useState([])
   const [loading, setLoading] = useState(false)
   const [selectedBooth, setSelectedBooth] = useState(null)
+  const [nearestBooth, setNearestBooth] = useState(null)
   const [userLocation, setUserLocation] = useState(null)
   const [mapCenter, setMapCenter] = useState(defaultCenter)
   const [mapZoom, setMapZoom] = useState(5)
@@ -73,12 +74,30 @@ function BoothLocator() {
 
     setLoading(true)
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude } = position.coords
         setUserLocation({ lat: latitude, lng: longitude })
         setMapCenter({ lat: latitude, lng: longitude })
-        setMapZoom(12)
-        setLoading(false)
+        setMapZoom(15)
+
+        try {
+          // Fetch nearest booth using geoclustering
+          const res = await fetch(`/api/booths/nearest?lat=${latitude}&lng=${longitude}&maxDistance=50000`)
+          const data = await res.json()
+          
+          if (data.booths && data.booths.length > 0) {
+            const nearest = data.booths[0]
+            setNearestBooth(nearest)
+            setSelectedBooth(nearest) // Auto-select on map
+          } else {
+            alert('No polling booths found within 50km of your location.')
+            setNearestBooth(null)
+          }
+        } catch (error) {
+          console.error('Failed to fetch nearest booth', error)
+        } finally {
+          setLoading(false)
+        }
       },
       (error) => {
         alert('Unable to get your location. Please enable location services.')
@@ -88,10 +107,11 @@ function BoothLocator() {
   }
 
   const getAmenityIcon = (amenity) => {
-    if (amenity.toLowerCase().includes('ramp')) return <AccessibleIcon fontSize="small" />
-    if (amenity.toLowerCase().includes('water')) return <WaterDropIcon fontSize="small" />
-    if (amenity.toLowerCase().includes('shade')) return <WeekendIcon fontSize="small" />
-    if (amenity.toLowerCase().includes('electricity')) return <AcUnitIcon fontSize="small" />
+    const a = amenity.toLowerCase()
+    if (a.includes('ramp')) return <AccessibleIcon fontSize="small" />
+    if (a.includes('water')) return <WaterDropIcon fontSize="small" />
+    if (a.includes('shade')) return <WeekendIcon fontSize="small" />
+    if (a.includes('electricity')) return <AcUnitIcon fontSize="small" />
     return <LocationOnIcon fontSize="small" />
   }
 
@@ -122,25 +142,26 @@ function BoothLocator() {
         Find your nearest polling booth using the interactive map. Pin colors represent the verification status of the booth's voters (Green = Fully Verified, Red = Unverified).
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, borderLeft: '6px solid #FF9933' }}>
         <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
             <Button
               variant="contained"
               onClick={handleUseCurrentLocation}
+              disabled={loading}
               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <MyLocationIcon />}
-              sx={{ bgcolor: '#FF9933', '&:hover': { bgcolor: '#e68a2e' } }}
+              sx={{ bgcolor: '#FF9933', '&:hover': { bgcolor: '#e68a2e' }, px: 3, py: 1, borderRadius: 2 }}
             >
               Find Nearest to Me
             </Button>
             <Typography variant="body2" color="text.secondary">
-              Enable location services to geocluster booths near you.
+              Uses high-precision geolocation and database geoclustering (2dsphere) to detect your closest voting center.
             </Typography>
           </Box>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 0, position: 'relative' }}>
           {!isLoaded ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '600px' }}>
@@ -152,11 +173,18 @@ function BoothLocator() {
               center={mapCenter}
               zoom={mapZoom}
               onClick={() => setSelectedBooth(null)}
+              options={{
+                streetViewControl: false,
+                mapTypeControl: false,
+                styles: [
+                  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }
+                ]
+              }}
             >
               {userLocation && (
                 <MarkerF
                   position={userLocation}
-                  icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                  icon="https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
                   title="Your Location"
                 />
               )}
@@ -183,28 +211,17 @@ function BoothLocator() {
                       {selectedBooth.address}
                     </Typography>
                     <Chip 
-                      label={`${selectedBooth.verifiedVoters} / ${selectedBooth.totalVoters} Verified`} 
+                      label={`${selectedBooth.verifiedVoters || 0} / ${selectedBooth.totalVoters || 0} Verified`} 
                       size="small" 
-                      color={selectedBooth.totalVoters > 0 && selectedBooth.verifiedVoters === selectedBooth.totalVoters ? "success" : "error"}
+                      color={selectedBooth.totalVoters > 0 && selectedBooth.verifiedVoters === selectedBooth.totalVoters ? "success" : "warning"}
                       sx={{ mb: 1 }}
                     />
                     <Divider sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {Object.entries(selectedBooth.facilities).filter(([k,v]) => v).map(([k,v]) => (
-                        <Chip
-                          key={k}
-                          icon={getAmenityIcon(k)}
-                          label={k}
-                          variant="outlined"
-                          size="small"
-                        />
-                      ))}
-                    </Box>
                     <Button
                       size="small"
                       variant="contained"
                       fullWidth
-                      sx={{ mt: 2, bgcolor: '#000080' }}
+                      sx={{ mt: 1, bgcolor: '#000080' }}
                       onClick={() => {
                         const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedBooth.location.coordinates[1]},${selectedBooth.location.coordinates[0]}`
                         window.open(url, '_blank')
@@ -219,6 +236,56 @@ function BoothLocator() {
           )}
         </CardContent>
       </Card>
+
+      {nearestBooth && (
+        <Card sx={{ borderLeft: '6px solid #1a237e', animation: 'fadeIn 0.5s ease-out' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+              <Box>
+                <Typography variant="overline" color="primary" sx={{ fontWeight: 700 }}>
+                  Closest Polling Station Detected
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: '#1a237e' }}>
+                  {nearestBooth.name}
+                </Typography>
+              </Box>
+              <Chip label="Nearest" color="primary" size="small" />
+            </Box>
+            
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Full Address</Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>{nearestBooth.address}</Typography>
+                
+                <Typography variant="subtitle2" color="text.secondary">Constituency</Typography>
+                <Typography variant="body1">{nearestBooth.constituency}</Typography>
+              </Box>
+              
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Facilities Available</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {Object.entries(nearestBooth.facilities || {}).filter(([k,v]) => v).map(([k,v]) => (
+                    <Chip
+                      key={k}
+                      icon={getAmenityIcon(k)}
+                      label={k.charAt(0).toUpperCase() + k.slice(1)}
+                      variant="outlined"
+                      size="small"
+                      sx={{ borderRadius: 1 }}
+                    />
+                  ))}
+                </Box>
+                
+                <Box sx={{ mt: 3, p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+                  <Typography variant="subtitle2" color="text.secondary">BLO Contact</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>{nearestBooth.bloName}</Typography>
+                  <Typography variant="body2">{nearestBooth.bloPhone}</Typography>
+                </Box>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
     </Box>
   )
 }
