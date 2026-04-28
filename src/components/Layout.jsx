@@ -43,12 +43,14 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import PersonIcon from '@mui/icons-material/Person'
 import LanguageSwitcher from './LanguageSwitcher'
+import CampaignIcon from '@mui/icons-material/Campaign'
 
 const citizenNavItems = [
   { label: 'Voter Search', path: '/voter-search', icon: <SearchIcon /> },
   { label: 'Services', path: '/booth-locator', icon: <MiscellaneousServicesIcon /> },
   { label: 'Notifications', path: '/notifications', icon: <NewspaperIcon /> },
   { label: 'Contact', path: '/complaint', icon: <ContactMailIcon /> },
+  { label: 'Report', path: 'https://urbaneye-iii.vercel.app/login', icon: <CampaignIcon />, external: true },
 ]
 
 const bloNavItems = [
@@ -56,6 +58,7 @@ const bloNavItems = [
   { label: 'QR Scanner', path: '/qr-scanner', icon: <QrCodeScannerIcon /> },
   { label: 'Complaints', path: '/complaint', icon: <ContactMailIcon /> },
   { label: 'Booth Info', path: '/booth-locator', icon: <MiscellaneousServicesIcon /> },
+  { label: 'Report', path: 'https://urbaneye-iii.vercel.app/login', icon: <CampaignIcon />, external: true },
 ]
 
 function Header({ onMenuClick }) {
@@ -137,8 +140,8 @@ function Header({ onMenuClick }) {
             return (
               <Button
                 key={item.path}
-                component={Link}
-                to={item.path}
+                component={item.external ? 'a' : Link}
+                {...(item.external ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' } : { to: item.path })}
                 startIcon={React.cloneElement(item.icon, { sx: { fontSize: 18 } })}
                 sx={{
                   color: isActive ? '#16a34a' : '#4b5563',
@@ -481,8 +484,8 @@ function Layout() {
           return (
             <ListItem
               key={item.path}
-              component={Link}
-              to={item.path}
+              component={item.external ? 'a' : Link}
+              {...(item.external ? { href: item.path, target: '_blank', rel: 'noopener noreferrer' } : { to: item.path })}
               onClick={handleDrawerToggle}
               sx={{
                 borderRadius: 3,
