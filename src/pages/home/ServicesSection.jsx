@@ -79,50 +79,75 @@ export default function ServicesSection() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 3,
+              borderRadius: 4,
               textDecoration: 'none',
               color: 'inherit',
-              border: '1px solid #e5e7eb',
-              bgcolor: '#fff',
-              transition: 'all 0.2s ease',
+              border: '1px solid',
+              borderColor: 'rgba(229, 231, 235, 0.6)',
+              bgcolor: `${service.color}15`, // Increased tint opacity
+              backdropFilter: 'blur(8px)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '4px',
+                height: '100%',
+                bgcolor: service.color,
+                opacity: 0,
+                transition: 'opacity 0.3s ease',
+              },
               '&:hover': {
-                borderColor: service.color,
-                boxShadow: `0 4px 20px ${service.color}15`,
-                transform: 'translateY(-2px)',
+                borderColor: `${service.color}40`,
+                bgcolor: `${service.color}20`, // Increased hover tint
+                boxShadow: `0 10px 30px -10px ${service.color}30`,
+                transform: 'translateY(-4px)',
+                '&::before': {
+                  opacity: 1,
+                }
               },
             }}
           >
             {/* Icon */}
             <Box
               sx={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                bgcolor: `${service.color}12`,
+                width: 56,
+                height: 56,
+                borderRadius: '16px',
+                bgcolor: '#ffffff',
+                boxShadow: `0 4px 12px ${service.color}15`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                mb: 2,
-                '& svg': { fontSize: 26, color: service.color },
+                mb: 2.5,
+                border: `1px solid ${service.color}15`,
+                '& svg': { fontSize: 28, color: service.color },
               }}
             >
               {service.icon}
             </Box>
 
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1f2937', mb: 1, fontSize: '1.05rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1f2937', mb: 1, fontSize: '1.1rem' }}>
               {service.title}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#6b7280', mb: 2, lineHeight: 1.5 }}>
+            <Typography variant="body2" sx={{ color: '#6b7280', mb: 3, lineHeight: 1.6 }}>
               {service.description}
             </Typography>
             <Typography
               variant="body2"
               sx={{
-                color: '#16a34a',
-                fontWeight: 600,
+                color: service.color,
+                fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
+                transition: 'gap 0.2s',
+                '.MuiPaper-root:hover &': {
+                  gap: 1.5,
+                }
               }}
             >
               View More <ArrowForwardIcon sx={{ fontSize: 16 }} />

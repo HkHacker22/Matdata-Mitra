@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const schemes = [
   { icon: '🆔', title: 'Voter ID Card (EPIC)', desc: 'Apply online for new EPIC card or correction', badge: 'Apply Now' },
@@ -55,6 +55,8 @@ const elections = [
 ]
 
 export default function LowerSections() {
+  const navigate = useNavigate();
+
   return (
     <div style={{ background: '#F8F9FA' }}>
 
@@ -68,7 +70,7 @@ export default function LowerSections() {
           <h2 style={{ fontSize: 17, fontWeight: 800, color: '#D32F2F', margin: 0, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             🏛 Election Services & Schemes
           </h2>
-          <button aria-label="View all election services and schemes" style={{ fontSize: 12, color: '#2E7D32', cursor: 'pointer', fontWeight: 600, background: 'none', border: 'none' }}>View All ›</button>
+          <button aria-label="View all election services and schemes" style={{ fontSize: 12, color: '#2E7D32', cursor: 'pointer', fontWeight: 600, background: 'none', border: 'none' }} onClick={() => window.open('https://voters.eci.gov.in/', '_blank')}>View All ›</button>
         </div>
         <div style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
           {schemes.map((s, i) => (
@@ -77,6 +79,7 @@ export default function LowerSections() {
               border: '1px solid #E5E7EB', display: 'flex', gap: 12, alignItems: 'flex-start',
               transition: 'transform 0.15s, border-color 0.15s', textAlign: 'left'
             }}
+              onClick={() => window.open('https://voters.eci.gov.in/', '_blank')}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#D32F2F' }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#E5E7EB' }}
               onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault() } }}
@@ -136,7 +139,7 @@ export default function LowerSections() {
           </div>
           <div style={{ textAlign: 'center', flexShrink: 0, marginLeft: 24 }}>
             <div style={{ fontSize: 48, marginBottom: 4 }}>🗳️</div>
-            <button aria-label="Register Now for Spotlight Campaign" style={{ background: '#F57C00', color: '#FFFFFF', padding: '8px 20px', borderRadius: 4, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: 'none' }}>
+            <button aria-label="Register Now for Spotlight Campaign" style={{ background: '#F57C00', color: '#FFFFFF', padding: '8px 20px', borderRadius: 4, fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap', border: 'none' }} onClick={() => window.open('https://voters.eci.gov.in/', '_blank')}>
               Register Now
             </button>
           </div>
@@ -160,6 +163,7 @@ export default function LowerSections() {
               padding: '16px', textAlign: 'center', cursor: 'pointer',
               borderRight: i < 3 ? '1px solid #E5E7EB' : 'none',
             }}
+              onClick={() => window.open('https://eci.gov.in/', '_blank')}
               onMouseEnter={e => e.currentTarget.style.background = '#F8F9FA'}
               onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
               onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault() } }}
@@ -189,6 +193,7 @@ export default function LowerSections() {
               padding: '14px 16px', textAlign: 'center', cursor: 'pointer',
               borderRight: i < 3 ? '1px solid #E5E7EB' : 'none', borderTop: i > 3 ? '1px solid #E5E7EB' : 'none',
             }}
+              onClick={() => navigate('/elections')}
               onMouseEnter={e2 => e2.currentTarget.style.background = '#F8F9FA'}
               onMouseLeave={e2 => e2.currentTarget.style.background = '#FFFFFF'}
               onKeyDown={ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault() } }}
@@ -215,6 +220,7 @@ export default function LowerSections() {
                 background: '#FFFFFF', border: '1px solid #E5E7EB',
                 color: '#D32F2F', padding: '6px 16px', borderRadius: 3, fontSize: 12, fontWeight: 600, cursor: 'pointer'
               }}
+                onClick={() => window.open('https://mygov.in/', '_blank')}
                 onMouseEnter={e => { e.currentTarget.style.background = '#F8F9FA'; e.currentTarget.style.borderColor = '#D32F2F' }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB' }}
               >{btn}</button>

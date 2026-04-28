@@ -1,25 +1,41 @@
-import React from 'react'
-import { Box, Typography, Divider } from '@mui/material'
-
-const newsItems = [
-  {
-    date: '27 Apr 2026',
-    title: 'ECI Announces Schedule for State Assembly Elections...',
-    description: 'ECI Announces Schedule for State Assembly Elections, short insuraments and/ors for State Assembly Elections in four States...',
-  },
-  {
-    date: '25 Apr 2026',
-    title: 'Voter Enrollment Drive: 1.2 Crore New Voters...',
-    description: 'Voter Enrollment Drive: 1.2 Crore New Voters, se-tarsos that\'s meturified by Commission Board esam and/w vote organizes...',
-  },
-  {
-    date: '20 Apr 2026',
-    title: 'SVEEP Initiative: "No Voter Left Behind" Campaign...',
-    description: 'SVEEP Initiative "No Voter Left Behind" Campaign, senovanise voter intilimet in the mroarit of used and services...',
-  },
-]
+import React, { useState, useEffect } from 'react'
+import { Box, Typography, Divider, CircularProgress, Link } from '@mui/material'
 
 export default function NewsSection() {
+  const [newsItems, setNewsItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const apiKey = import.meta.env.VITE_NEWSDATA_API_KEY
+        const response = await fetch(
+          `https://newsdata.io/api/1/latest?apikey=${apiKey}&country=in&language=en,hi&category=politics&image=1&video=0`
+        )
+        const data = await response.json()
+        if (data.status === 'success') {
+          // Take the first 5 news items
+          setNewsItems(data.results.slice(0, 5))
+        } else {
+          setError('Failed to load news')
+        }
+      } catch (err) {
+        setError('Error fetching news')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNews()
+  }, [])
+
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const options = { day: '2-digit', month: 'short', year: 'numeric' }
+    return new Date(dateString).toLocaleDateString('en-GB', options)
+  }
+
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3 }, py: { xs: 4, md: 6 } }}>
       <Typography
@@ -30,70 +46,110 @@ export default function NewsSection() {
       </Typography>
 
       <Box sx={{ bgcolor: '#fff', borderRadius: 3, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-        {newsItems.map((item, index) => (
-          <Box key={index}>
-            <Box
-              sx={{
-                display: 'flex',
-                gap: { xs: 2, sm: 4 },
-                p: { xs: 2, sm: 3 },
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-                '&:hover': { bgcolor: '#f9fafb' },
-              }}
-            >
-              {/* Date */}
-              <Typography
-                variant="body2"
+        {loading ? (
+          <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress color="success" />
+          </Box>
+        ) : error ? (
+          <Box sx={{ p: 4 }}>
+            <Typography color="error">{error}</Typography>
+          </Box>
+        ) : (
+          newsItems.map((item, index) => (
+            <Box key={item.article_id || index}>
+              <Box
+                component={Link}
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 sx={{
-                  color: '#16a34a',
-                  fontWeight: 600,
-                  minWidth: { xs: 70, sm: 100 },
-                  flexShrink: 0,
-                  fontSize: '0.85rem',
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  gap: { xs: 2, sm: 4 },
+                  p: { xs: 2, sm: 3 },
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s',
+                  '&:hover': { bgcolor: '#f9fafb' },
                 }}
               >
-                {item.date}
-              </Typography>
-
-              {/* Content */}
-              <Box>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#1f2937',
-                    mb: 0.5,
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                  }}
-                >
-                  {item.title}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#6b7280', lineHeight: 1.5 }}>
-                  {item.description}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#9ca3af', mt: 0.5, display: 'block' }}>
-                  {item.date}
-                </Typography>
+                {/* Image */}
+                {item.image_url && (
+                   <Box
+                     component="img"
+                     src={item.image_url}
+                     alt={item.title}
+                     sx={{
+                       width: { xs: '100%', sm: 120 },
+                       height: { xs: 180, sm: 80 },
+                       objectFit: 'cover',
+                       borderRadius: 2,
+                       flexShrink: 0
+                     }}
+                   />
+                )}
+                
+                {/* Content */}
+                <Box sx={{ flex: 1 }}>
+                   <Typography
+                     variant="subtitle1"
+                     sx={{
+                       fontWeight: 700,
+                       color: '#1f2937',
+                       mb: 0.5,
+                       fontSize: { xs: '0.9rem', sm: '1rem' },
+                       display: '-webkit-box',
+                       WebkitLineClamp: 2,
+                       WebkitBoxOrient: 'vertical',
+                       overflow: 'hidden'
+                     }}
+                   >
+                     {item.title}
+                   </Typography>
+                   <Typography 
+                     variant="body2" 
+                     sx={{ 
+                       color: '#6b7280', 
+                       lineHeight: 1.5,
+                       display: '-webkit-box',
+                       WebkitLineClamp: 2,
+                       WebkitBoxOrient: 'vertical',
+                       overflow: 'hidden'
+                     }}
+                   >
+                     {item.description || "Click to read more about this news update."}
+                   </Typography>
+                   <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 600, mt: 1, display: 'block' }}>
+                     {formatDate(item.pubDate)}
+                   </Typography>
+                </Box>
               </Box>
+              {index < newsItems.length - 1 && <Divider />}
             </Box>
-            {index < newsItems.length - 1 && <Divider />}
-          </Box>
-        ))}
+          ))
+        )}
       </Box>
 
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#16a34a',
-          fontWeight: 600,
-          mt: 2,
-          cursor: 'pointer',
-          '&:hover': { textDecoration: 'underline' },
-        }}
-      >
-        View All News
-      </Typography>
+      {!loading && !error && (
+        <Typography
+          component={Link}
+          href="https://www.eci.gov.in/"
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="body2"
+          sx={{
+            color: '#16a34a',
+            fontWeight: 600,
+            mt: 2,
+            display: 'inline-block',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+        >
+          View All News
+        </Typography>
+      )}
     </Box>
   )
 }

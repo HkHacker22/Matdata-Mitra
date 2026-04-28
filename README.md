@@ -107,6 +107,9 @@ matdata-mitra/
 
 ## 🔒 Security
 
+*   **Role-Based Access Control:** Strict, pre-authorized BLO (Booth Level Officer) roles are enforced at the database level to prevent privilege escalation. Only registered admins/BLOs can access sensitive areas.
+*   **Router Locking:** The frontend uses a custom `ProtectedRoute` component to lock down sensitive dashboard routes, preventing unauthorized access by non-BLO users.
+*   **Directory Enumeration Prevention:** Server-side middleware explicitly blocks access to dotfiles and prevents unauthorized path traversal vulnerabilities.
 *   The backend utilizes `helmet` for HTTP header security and `express-rate-limit` to prevent brute-force attacks.
 *   Authentication is secured via Firebase ID tokens validated securely on the backend via the Firebase Admin SDK.
 *   Never commit your `.env` or `server/config/serviceAccountKey.json` files.
