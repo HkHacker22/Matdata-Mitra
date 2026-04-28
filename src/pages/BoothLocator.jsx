@@ -144,19 +144,37 @@ function BoothLocator() {
 
       <Card sx={{ mb: 3, borderLeft: '6px solid #FF9933' }}>
         <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-            <Button
-              variant="contained"
-              onClick={handleUseCurrentLocation}
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <MyLocationIcon />}
-              sx={{ bgcolor: '#FF9933', '&:hover': { bgcolor: '#e68a2e' }, px: 3, py: 1, borderRadius: 2 }}
-            >
-              Find Nearest to Me
-            </Button>
-            <Typography variant="body2" color="text.secondary">
-              Uses high-precision geolocation and database geoclustering (2dsphere) to detect your closest voting center.
-            </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Button
+                variant="contained"
+                onClick={handleUseCurrentLocation}
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <MyLocationIcon />}
+                sx={{ bgcolor: '#FF9933', '&:hover': { bgcolor: '#e68a2e' }, px: 3, py: 1, borderRadius: 2 }}
+              >
+                Find Nearest to Me
+              </Button>
+              <Typography variant="body2" color="text.secondary">
+                Uses high-precision geolocation and database geoclustering (2dsphere) to detect your closest voting center.
+              </Typography>
+            </Box>
+            
+            {/* Legend */}
+            <Box sx={{ display: 'flex', gap: 2, p: 1, bgcolor: '#f8fafc', borderRadius: 2, border: '1px solid #e2e8f0' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#4CAF50' }} />
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>100% Verified</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#FFC107' }} />
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>Partial</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#F44336' }} />
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>Pending</Typography>
+              </Box>
+            </Box>
           </Box>
         </CardContent>
       </Card>
