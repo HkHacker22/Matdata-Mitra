@@ -58,7 +58,7 @@ function BoothLocator() {
     setLoading(true)
     try {
       const data = await apiClient.get('/booths/map-data')
-      setBooths(data)
+      setBooths(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Failed to fetch map data', error)
     } finally {
@@ -116,10 +116,15 @@ function BoothLocator() {
 
   // Determine marker color based on verification ratio
   const getMarkerIcon = (booth) => {
-    const ratio = booth.totalVoters > 0 ? (booth.verifiedVoters / booth.totalVoters) : 0
+    if (!booth) return 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+    
+    const total = booth.totalVoters || 0
+    const verified = booth.verifiedVoters || 0
+    const ratio = total > 0 ? (verified / total) : 0
+    
     let color = 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' // Pending/Unverified
     
-    if (booth.totalVoters > 0 && booth.verifiedVoters === booth.totalVoters) {
+    if (total > 0 && verified === total) {
       color = 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' // 100% verified
     } else if (ratio > 0.5) {
       color = 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png' // Mostly verified
@@ -206,7 +211,7 @@ function BoothLocator() {
                 />
               )}
 
-              {booths.filter(b => b.location && b.location.coordinates).map((booth) => (
+              {Array.isArray(booths) && booths.filter(b => b.location && b.location.coordinates).map((booth) => (
                 <MarkerF
                   key={booth._id}
                   position={{ lat: booth.location.coordinates[1], lng: booth.location.coordinates[0] }}

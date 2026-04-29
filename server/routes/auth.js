@@ -97,12 +97,14 @@ router.patch('/profile', authenticate, async (req, res) => {
     }
 
     if (epicId) {
-      // Verify epicId exists in Voter database
-      const voter = await Voter.findOne({ voterId: epicId })
+      // Verify epicId exists in Voter database (case-insensitive)
+      const voter = await Voter.findOne({ 
+        voterId: { $regex: new RegExp(`^${epicId}$`, 'i') } 
+      })
       if (!voter) {
         return res.status(400).json({ error: 'Invalid EPIC ID. Voter not found in electoral rolls.' })
       }
-      user.epicId = epicId
+      user.epicId = voter.voterId // Use the canonical uppercase version from DB
     }
 
     await user.save()

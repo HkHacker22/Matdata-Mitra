@@ -413,7 +413,15 @@ function Layout() {
     const checkProfile = async () => {
       const token = localStorage.getItem('authToken')
       const role = localStorage.getItem('userRole')
-      if (token && role === 'citizen' && !userEpicId) {
+      
+      // Don't show modal on home, search, or login pages
+      const excludedPaths = ['/', '/voter-search', '/login', '/blo-login']
+      if (excludedPaths.includes(location.pathname)) {
+        setEpicIdModalOpen(false)
+        return
+      }
+
+      if (token && role === 'citizen' && !userEpicId && !epicIdModalOpen) {
         try {
           const data = await apiClient.get('/auth/me')
           if (data.epicId) {
@@ -423,12 +431,12 @@ function Layout() {
             setEpicIdModalOpen(true)
           }
         } catch (e) {
-          console.error(e)
+          console.error('EPIC Check Error:', e)
         }
       }
     }
     checkProfile()
-  }, [userEpicId, location.pathname])
+  }, [userEpicId, location.pathname, epicIdModalOpen])
 
   const handleEpicSubmit = async () => {
     if (!epicIdInput.trim()) {
@@ -568,6 +576,15 @@ function Layout() {
             color="inherit"
           >
             Logout
+          </Button>
+          <Button 
+            onClick={() => {
+              setEpicIdModalOpen(false);
+              navigate('/voter-search');
+            }}
+            sx={{ color: '#16a34a' }}
+          >
+            Find My EPIC ID
           </Button>
           <Button onClick={handleEpicSubmit} variant="contained" disabled={epicLoading} sx={{ bgcolor: '#16a34a' }}>
             {epicLoading ? <CircularProgress size={24} color="inherit" /> : 'Link Voter ID'}

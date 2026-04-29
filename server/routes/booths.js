@@ -82,6 +82,11 @@ router.get('/nearest', async (req, res) => {
   }
 })
 
+// Alias for nearest
+router.get('/nearby', (req, res) => {
+  res.redirect(301, `/api/booths/nearest?${new URLSearchParams(req.query).toString()}`)
+})
+
 /**
  * GET /api/booths/map-data
  * Get all booths with verification stats for map plotting

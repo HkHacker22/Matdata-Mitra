@@ -84,12 +84,24 @@ class ApiClient {
     if (endpoint.startsWith('/booths/search')) {
       return { booths: mockData.booths, pagination: { total: mockData.booths.length, pages: 1 } }
     }
+    if (endpoint.startsWith('/booths/map-data')) {
+      return mockData.booths.map(booth => ({
+        ...booth,
+        totalVoters: Math.floor(Math.random() * 1000) + 500,
+        verifiedVoters: Math.floor(Math.random() * 500),
+      }))
+    }
     if (endpoint.startsWith('/notifications')) {
       return { notifications: mockData.notifications, pagination: { total: mockData.notifications.length, pages: 1 } }
     }
     if (endpoint.startsWith('/complaints')) {
       if (options.method === 'POST') return { id: 'complaint_' + Date.now(), status: 'pending' }
       return { complaints: [], pagination: { total: 0, pages: 1 } }
+    }
+
+    // Default to empty array for search/list endpoints to avoid .filter crashes
+    if (endpoint.includes('search') || endpoint.includes('data') || endpoint.includes('list')) {
+      return []
     }
 
     return {}

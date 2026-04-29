@@ -149,7 +149,7 @@ function VoterSearch() {
                         size="small"
                         variant="outlined"
                         component={Link}
-                        to={`/qr-generator?voterId=${voter.id}`}
+                        to={`/qr-generator?voterId=${voter.voterId}`}
                         sx={{ borderColor: '#FF9933', color: '#FF9933' }}
                       >
                         Generate QR
