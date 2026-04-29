@@ -19,6 +19,7 @@ import AccessibleIcon from '@mui/icons-material/Accessible'
 import WeekendIcon from '@mui/icons-material/Weekend'
 import AcUnitIcon from '@mui/icons-material/AcUnit'
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api'
+import { apiClient } from '../api/client'
 
 // Use actual API key from env
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
@@ -56,8 +57,7 @@ function BoothLocator() {
   const fetchMapData = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/booths/map-data')
-      const data = await res.json()
+      const data = await apiClient.get('/booths/map-data')
       setBooths(data)
     } catch (error) {
       console.error('Failed to fetch map data', error)
@@ -82,8 +82,7 @@ function BoothLocator() {
 
         try {
           // Fetch nearest booth using geoclustering
-          const res = await fetch(`/api/booths/nearest?lat=${latitude}&lng=${longitude}&maxDistance=50000`)
-          const data = await res.json()
+          const data = await apiClient.get(`/booths/nearest?lat=${latitude}&lng=${longitude}&maxDistance=50000`)
           
           if (data.booths && data.booths.length > 0) {
             const nearest = data.booths[0]

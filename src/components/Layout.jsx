@@ -44,6 +44,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile'
 import PersonIcon from '@mui/icons-material/Person'
 import LanguageSwitcher from './LanguageSwitcher'
 import CampaignIcon from '@mui/icons-material/Campaign'
+import { apiClient } from '../api/client'
 
 const citizenNavItems = [
   { label: 'Voter Search', path: '/voter-search', icon: <SearchIcon /> },
@@ -414,17 +415,12 @@ function Layout() {
       const role = localStorage.getItem('userRole')
       if (token && role === 'citizen' && !userEpicId) {
         try {
-          const res = await fetch('/api/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-          if (res.ok) {
-            const data = await res.json()
-            if (data.epicId) {
-              setUserEpicId(data.epicId)
-              localStorage.setItem('userEpicId', data.epicId)
-            } else {
-              setEpicIdModalOpen(true)
-            }
+          const data = await apiClient.get('/auth/me')
+          if (data.epicId) {
+            setUserEpicId(data.epicId)
+            localStorage.setItem('userEpicId', data.epicId)
+          } else {
+            setEpicIdModalOpen(true)
           }
         } catch (e) {
           console.error(e)
@@ -442,19 +438,7 @@ function Layout() {
     setEpicLoading(true)
     setEpicError('')
     try {
-      const token = localStorage.getItem('authToken')
-      const res = await fetch('/api/auth/profile', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ epicId: epicIdInput.trim() })
-      })
-      
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to link EPIC ID')
-      
+      const data = await apiClient.patch('/auth/profile', { epicId: epicIdInput.trim() })
       setUserEpicId(data.epicId)
       localStorage.setItem('userEpicId', data.epicId)
       setEpicIdModalOpen(false)

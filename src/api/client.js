@@ -1,4 +1,12 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+import * as mockData from './mockData'
+
+const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE_URL = isDev 
+  ? (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api') 
+  : '/api'
+
+// For production demo, intercept and return mock data to avoid backend dependency
+const USE_MOCKS = !isDev
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {
@@ -11,6 +19,10 @@ class ApiClient {
   }
 
   async request(endpoint, options = {}) {
+    if (USE_MOCKS) {
+      return this.mockRequest(endpoint, options)
+    }
+
     const url = `${this.baseURL}${endpoint}`
     const config = {
       headers: {
@@ -41,6 +53,47 @@ class ApiClient {
     }
   }
 
+  async mockRequest(endpoint, options) {
+    console.log(`[Mock API] ${options.method || 'GET'} ${endpoint}`)
+    
+    // Artificial delay
+    await new Promise(r => setTimeout(r, 300))
+
+    if (endpoint.startsWith('/auth/me')) return mockData.demoUser
+    if (endpoint.startsWith('/auth/verify-token')) {
+      return { token: 'mock_jwt_token', user: mockData.demoUser }
+    }
+    if (endpoint.startsWith('/voters/search')) {
+      const params = new URLSearchParams(endpoint.split('?')[1])
+      const q = params.get('q')?.toLowerCase() || ''
+      const filtered = mockData.voters.filter(v => 
+        v.name.toLowerCase().includes(q) || v.voterId.toLowerCase().includes(q)
+      )
+      return { voters: filtered, pagination: { total: filtered.length, pages: 1 } }
+    }
+    if (endpoint.startsWith('/voters/dashboard/stats')) {
+      return { totalAssigned: 50, verified: 12, pending: 38, verifiedByMe: 8 }
+    }
+    if (endpoint.startsWith('/voters/')) {
+      const id = endpoint.split('/')[2]
+      const voter = mockData.voters.find(v => v.voterId === id || v.id === id)
+      if (voter) return voter
+      throw new ApiError(404, 'Voter not found')
+    }
+    if (endpoint.startsWith('/booths/search')) {
+      return { booths: mockData.booths, pagination: { total: mockData.booths.length, pages: 1 } }
+    }
+    if (endpoint.startsWith('/notifications')) {
+      return { notifications: mockData.notifications, pagination: { total: mockData.notifications.length, pages: 1 } }
+    }
+    if (endpoint.startsWith('/complaints')) {
+      if (options.method === 'POST') return { id: 'complaint_' + Date.now(), status: 'pending' }
+      return { complaints: [], pagination: { total: 0, pages: 1 } }
+    }
+
+    return {}
+  }
+
   get(endpoint, options = {}) {
     return this.request(endpoint, { ...options, method: 'GET' })
   }
@@ -51,6 +104,14 @@ class ApiClient {
 
   put(endpoint, data, options = {}) {
     return this.request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) })
+  }
+
+  patch(endpoint, data, options = {}) {
+    return this.request(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(data) })
+  }
+
+  patch(endpoint, data, options = {}) {
+    return this.request(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(data) })
   }
 
   delete(endpoint, options = {}) {

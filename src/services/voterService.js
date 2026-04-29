@@ -1,8 +1,8 @@
+import { apiClient } from '../api/client'
+
 export const searchVoters = async (query) => {
   try {
-    const response = await fetch(`/api/voters/search?q=${encodeURIComponent(query)}`)
-    if (!response.ok) throw new Error('Search failed')
-    const data = await response.json()
+    const data = await apiClient.get(`/voters/search?q=${encodeURIComponent(query)}`)
     return data.voters || []
   } catch (err) {
     console.error('searchVoters error:', err)
@@ -12,9 +12,7 @@ export const searchVoters = async (query) => {
 
 export const getVoterById = async (id) => {
   try {
-    const response = await fetch(`/api/voters/${encodeURIComponent(id)}`)
-    if (!response.ok) throw new Error('Failed to fetch voter')
-    return await response.json()
+    return await apiClient.get(`/voters/${encodeURIComponent(id)}`)
   } catch (err) {
     console.error('getVoterById error:', err)
     return null
@@ -34,16 +32,7 @@ export const generateVoterQRData = (voter) => {
 
 export const verifyVoter = async (id) => {
   try {
-    const token = localStorage.getItem('authToken')
-    const response = await fetch(`/api/voters/${id}/verify`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    if (!response.ok) {
-      const err = await response.json().catch(()=>({}))
-      throw new Error(err.error || 'Failed to verify voter')
-    }
-    return await response.json()
+    return await apiClient.post(`/voters/${id}/verify`)
   } catch (err) {
     console.error('verifyVoter error:', err)
     throw err
@@ -52,12 +41,7 @@ export const verifyVoter = async (id) => {
 
 export const getRecentVerifications = async () => {
   try {
-    const token = localStorage.getItem('authToken')
-    const response = await fetch('/api/voters/verifications/recent?limit=5', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    if (!response.ok) throw new Error('Failed to fetch recent verifications')
-    return await response.json()
+    return await apiClient.get('/voters/verifications/recent?limit=5')
   } catch (err) {
     console.error('getRecentVerifications error:', err)
     return []
@@ -66,14 +50,9 @@ export const getRecentVerifications = async () => {
 
 export const getVoterStats = async () => {
   try {
-    const token = localStorage.getItem('authToken')
-    const response = await fetch('/api/voters/dashboard/stats', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    if (!response.ok) throw new Error('Failed to fetch stats')
-    return await response.json()
+    return await apiClient.get('/voters/dashboard/stats')
   } catch (err) {
     console.error('getVoterStats error:', err)
     return { totalAssigned: 0, verified: 0, pending: 0, verifiedByMe: 0 }
   }
-}
+}

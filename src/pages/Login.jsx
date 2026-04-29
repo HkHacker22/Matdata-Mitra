@@ -28,6 +28,7 @@ import {
   signInWithPhoneNumber,
 } from 'firebase/auth'
 import { auth } from '../config/firebase'
+import { apiClient } from '../api/client'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -109,23 +110,13 @@ export default function Login() {
       // Sync with backend
       const user = auth.currentUser
       const token = await user.getIdToken()
-      const response = await fetch('/api/auth/verify-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || '',
-          role: 'citizen',
-        }),
+      const data = await apiClient.post('/auth/verify-token', {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || '',
+        role: 'citizen',
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Backend synchronization failed')
-      }
-
-      const data = await response.json()
       localStorage.setItem('authToken', token)
       localStorage.setItem('userEmail', user.email || '')
       localStorage.setItem('userRole', 'citizen')
@@ -172,22 +163,12 @@ export default function Login() {
       const result = await confirmResult.confirm(otp)
       const user = result.user
       const token = await user.getIdToken()
-      const response = await fetch('/api/auth/verify-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          phone: user.phoneNumber,
-          role: 'citizen',
-        }),
+      const data = await apiClient.post('/auth/verify-token', {
+        uid: user.uid,
+        phone: user.phoneNumber,
+        role: 'citizen',
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'OTP verification failed')
-      }
-
-      const data = await response.json()
       localStorage.setItem('authToken', token)
       localStorage.setItem('userPhone', user.phoneNumber || '')
       localStorage.setItem('userRole', 'citizen')

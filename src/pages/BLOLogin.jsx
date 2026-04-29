@@ -18,6 +18,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../config/firebase'
+import { apiClient } from '../api/client'
 
 export default function BLOLogin() {
   const navigate = useNavigate()
@@ -78,25 +79,15 @@ export default function BLOLogin() {
     setLoading(true)
     setError('')
     try {
-      // BLO logs in with their email credentials
       await signInWithEmailAndPassword(auth, bloId, password)
       const user = auth.currentUser
       const token = await user.getIdToken()
-      const response = await fetch('/api/auth/verify-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || '',
-          role: 'blo',
-        }),
+      await apiClient.post('/auth/verify-token', {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || '',
+        role: 'blo',
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'BLO authorization failed')
-      }
       localStorage.setItem('authToken', token)
       localStorage.setItem('userRole', 'blo')
       navigate('/blo-dashboard')

@@ -113,6 +113,23 @@ npm run dev
 
 > **Note:** The Vite development server automatically proxies all requests from `/api/*` to the backend on port 3001.
 
+## 🛠️ Production Deployment & Challenges
+
+During the migration to production (Firebase), we encountered several enterprise-tier constraints that led to a creative architectural shift:
+
+### **Challenges Faced**
+1. **The Blaze Plan Wall**: Firebase Functions (v1 & v2) now require the **Blaze (Pay-as-you-go) plan** to deploy. This is due to the underlying dependency on Google Cloud Build and Artifact Registry APIs.
+2. **Outbound Networking**: On the free **Spark plan**, Cloud Functions are restricted from making outbound network requests to non-Google services. This prevents the serverless backend from connecting to **MongoDB Atlas**.
+3. **Routing Complexity**: Initial attempts to rewrite `/api` traffic to Functions resulted in `index.html` fallback loops when the Functions were blocked by billing requirements.
+
+### **The Solution: "Demo Mode" Mock Architecture**
+To ensure a fully functional **zero-cost deployment** for demonstrations, we implemented a sophisticated frontend fallback system:
+
+- **Centralized API Client**: Refactored the entire application to use a custom `apiClient` (`src/api/client.js`) that wraps all network calls.
+- **Production Interceptor**: In production mode, the client automatically intercepts `/api` requests and routes them to a local **Mock Service Layer** (`src/api/mockData.js`).
+- **Live Demo Persistence**: This architecture allows the app to be hosted entirely on **Firebase Hosting (Free Tier)** while appearing fully functional, including Voter Search, Dashboard Analytics, and Complaint Management.
+- **Future-Proofing**: The codebase remains "backend-ready." Simply toggling `USE_MOCKS = false` in the API client and deploying the `functions/` directory (on a Blaze plan) will activate the live MongoDB backend instantly.
+
 ## 📂 Project Structure
 
 ```text

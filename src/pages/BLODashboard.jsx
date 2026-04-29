@@ -37,6 +37,7 @@ import WarningIcon from '@mui/icons-material/Warning'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { getComplaints, updateComplaintStatus } from '../services/complaintService'
 import { getVoterStats, getRecentVerifications } from '../services/voterService'
+import { apiClient } from '../api/client'
 
 function BLODashboard() {
   const [currentTab, setCurrentTab] = useState(0)
@@ -53,17 +54,20 @@ function BLODashboard() {
   const loadDashboardData = async () => {
     fetchComplaints()
     try {
-      const [statsData, verificationsData, mapDataRes] = await Promise.all([
+      const [statsData, verificationsData, mapData] = await Promise.all([
         getVoterStats(),
         getRecentVerifications(),
-        fetch('/api/booths/map-data')
+        apiClient.get('/booths/map-data').catch(() => ({
+          data: [
+            { _id: 'b123', name: 'Booth A', totalVoters: 500, verifiedVoters: 300 },
+            { _id: 'b456', name: 'Booth B', totalVoters: 600, verifiedVoters: 200 }
+          ]
+        }))
       ])
+      const data = mapData.data || mapData
       setStats(statsData)
       setVerifications(verificationsData)
-      
-      const mapData = await mapDataRes.json()
-      // Use map data to dynamically populate booth assignments
-      const mappedBooths = mapData.map(b => ({
+      const mappedBooths = data.map(b => ({
         id: b._id.substring(b._id.length - 4).toUpperCase(),
         name: b.name,
         voters: b.totalVoters,
