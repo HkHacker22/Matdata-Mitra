@@ -6,7 +6,8 @@ const API_BASE_URL = isDev
   : '/api'
 
 // For production demo, intercept and return mock data to avoid backend dependency
-const USE_MOCKS = !isDev
+// Also allow manual override via env var for local development
+export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === 'true' || !isDev
 
 class ApiClient {
   constructor(baseURL = API_BASE_URL) {

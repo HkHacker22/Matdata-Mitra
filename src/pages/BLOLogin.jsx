@@ -18,7 +18,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../config/firebase'
-import { apiClient } from '../api/client'
+import { apiClient, USE_MOCKS } from '../api/client'
 
 export default function BLOLogin() {
   const navigate = useNavigate()
@@ -72,27 +72,53 @@ export default function BLOLogin() {
 
   const handleBloLogin = async (e) => {
     e.preventDefault()
-    if (!auth) {
-      setError('Firebase is not configured.')
-      return
-    }
     setLoading(true)
     setError('')
     try {
-      await signInWithEmailAndPassword(auth, bloId, password)
-      const user = auth.currentUser
-      const token = await user.getIdToken()
-      await apiClient.post('/auth/verify-token', {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName || '',
-        role: 'blo',
-      })
-      localStorage.setItem('authToken', token)
-      localStorage.setItem('userRole', 'blo')
-      navigate('/blo-dashboard')
+      // 1. Firebase Authentication
+      console.log('⏳ Authenticating with Firebase...')
+      let user;
+      try {
+        await signInWithEmailAndPassword(auth, bloId, password)
+        user = auth.currentUser
+      } catch (fbErr) {
+        console.error('Firebase Auth Error:', fbErr)
+        if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/wrong-password' || fbErr.code === 'auth/invalid-credential') {
+          throw new Error('Invalid BLO credentials. Please check your Email and Password.')
+        }
+        throw new Error(fbErr.message.replace('Firebase: ', ''))
+      }
+
+      // 2. Backend Synchronization & Role Verification
+      console.log('⏳ Verifying BLO role with backend...')
+      try {
+        const token = await user.getIdToken()
+        const response = await apiClient.post('/auth/verify-token', {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || '',
+          role: 'blo',
+        })
+        
+        // Use backend token if returned, otherwise fallback to Firebase token
+        localStorage.setItem('authToken', response.token || token)
+        localStorage.setItem('userRole', 'blo')
+        localStorage.setItem('userName', response.user?.name || user.displayName || 'BLO Officer')
+        
+        console.log('✅ BLO Login successful')
+        navigate('/blo-dashboard')
+      } catch (apiErr) {
+        console.error('Backend Sync Error:', apiErr)
+        if (apiErr.status === 403) {
+          throw new Error('Access Denied. This account is not authorized as a BLO in the database.')
+        }
+        if (apiErr.status === 0) {
+          throw new Error('Server connection failed. Please ensure the backend is running.')
+        }
+        throw apiErr
+      }
     } catch (err) {
-      setError('Invalid BLO credentials. Please check your ID and password.')
+      setError(err.message)
     } finally {
       setLoading(false)
     }

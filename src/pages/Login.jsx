@@ -28,7 +28,7 @@ import {
   signInWithPhoneNumber,
 } from 'firebase/auth'
 import { auth } from '../config/firebase'
-import { apiClient } from '../api/client'
+import { apiClient, USE_MOCKS } from '../api/client'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -102,30 +102,53 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      if (isRegister) {
-        await createUserWithEmailAndPassword(auth, email, password)
-      } else {
-        await signInWithEmailAndPassword(auth, email, password)
+      if (!auth) {
+        throw new Error('Firebase is not configured. Check your .env file.')
       }
-      // Sync with backend
+
+      // 1. Firebase Auth
+      console.log('⏳ Authenticating with Firebase...')
+      try {
+        if (isRegister) {
+          await createUserWithEmailAndPassword(auth, email, password)
+        } else {
+          await signInWithEmailAndPassword(auth, email, password)
+        }
+      } catch (fbErr) {
+        console.error('Firebase Auth Error:', fbErr)
+        throw new Error(fbErr.message.replace('Firebase: ', '').replace(/\(auth\/.*\)/, ''))
+      }
+
+      // 2. Backend Sync
+      console.log('⏳ Syncing with backend...')
       const user = auth.currentUser
       const token = await user.getIdToken()
-      const data = await apiClient.post('/auth/verify-token', {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName || '',
-        role: 'citizen',
-      })
+      try {
+        const data = await apiClient.post('/auth/verify-token', {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || '',
+          role: 'citizen',
+        })
 
-      localStorage.setItem('authToken', token)
-      localStorage.setItem('userEmail', user.email || '')
-      localStorage.setItem('userRole', 'citizen')
-      if (data.user && data.user.epicId) {
-        localStorage.setItem('userEpicId', data.user.epicId)
+        localStorage.setItem('authToken', data.token || token)
+        localStorage.setItem('userEmail', user.email || '')
+        localStorage.setItem('userRole', 'citizen')
+        if (data.user && data.user.epicId) {
+          localStorage.setItem('userEpicId', data.user.epicId)
+        }
+        
+        console.log('✅ Login successful')
+        navigate('/')
+      } catch (apiErr) {
+        console.error('Backend Sync Error:', apiErr)
+        if (apiErr.status === 0) {
+          throw new Error('Server connection failed. Using offline mode.')
+        }
+        throw apiErr
       }
-      navigate('/')
     } catch (err) {
-      setError(err.message.replace('Firebase: ', '').replace(/\(auth\/.*\)/, ''))
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -160,24 +183,45 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      const result = await confirmResult.confirm(otp)
+      // 1. Verify OTP with Firebase
+      console.log('⏳ Verifying OTP...')
+      let result;
+      try {
+        result = await confirmResult.confirm(otp)
+      } catch (fbErr) {
+        console.error('Firebase OTP Error:', fbErr)
+        throw new Error('Invalid OTP. Please try again.')
+      }
+
+      // 2. Sync with Backend
+      console.log('⏳ Syncing with backend...')
       const user = result.user
       const token = await user.getIdToken()
-      const data = await apiClient.post('/auth/verify-token', {
-        uid: user.uid,
-        phone: user.phoneNumber,
-        role: 'citizen',
-      })
+      try {
+        const data = await apiClient.post('/auth/verify-token', {
+          uid: user.uid,
+          phone: user.phoneNumber,
+          role: 'citizen',
+        })
 
-      localStorage.setItem('authToken', token)
-      localStorage.setItem('userPhone', user.phoneNumber || '')
-      localStorage.setItem('userRole', 'citizen')
-      if (data.user && data.user.epicId) {
-        localStorage.setItem('userEpicId', data.user.epicId)
+        localStorage.setItem('authToken', data.token || token)
+        localStorage.setItem('userPhone', user.phoneNumber || '')
+        localStorage.setItem('userRole', 'citizen')
+        if (data.user && data.user.epicId) {
+          localStorage.setItem('userEpicId', data.user.epicId)
+        }
+        
+        console.log('✅ OTP Login successful')
+        navigate('/')
+      } catch (apiErr) {
+        console.error('Backend Sync Error:', apiErr)
+        if (apiErr.status === 0) {
+          throw new Error('Server connection failed. Using offline mode.')
+        }
+        throw apiErr
       }
-      navigate('/')
     } catch (err) {
-      setError('Invalid OTP. Please try again.')
+      setError(err.message)
     } finally {
       setLoading(false)
     }
